@@ -5,7 +5,24 @@ use std::collections::HashMap;
 pub use global_id::GlobalId;
 use rowan::TextSize;
 
-use crate::{FileId, LuaSemanticDeclId, LuaType, XmakeScope};
+use crate::{FileId, LuaSemanticDeclId, LuaType, XmakeScope, is_script_scope_position};
+
+#[derive(Debug, Clone, Copy)]
+pub struct PositionContext {
+    pub file_id: FileId,
+    pub position: TextSize,
+    pub is_script_scope: bool,
+}
+
+impl PositionContext {
+    pub fn new(db: &DbIndex, file_id: FileId, position: TextSize) -> Self {
+        Self {
+            file_id,
+            position,
+            is_script_scope: is_script_scope_position(db, file_id, position),
+        }
+    }
+}
 
 use super::{DbIndex, LuaDeclId, LuaIndex};
 
@@ -60,8 +77,12 @@ impl LuaGlobalIndex {
             return Some(decl_ids[0]);
         }
 
+        let ctx = PositionContext::new(db, file_id, position);
         let mut last_valid_decl_id = None;
         for decl_id in decl_ids {
+            if filter_global_decl_by_scope(db, *decl_id, &ctx).is_some() {
+                continue;
+            }
             let decl_type_cache = db.get_type_index().get_type_cache(&decl_id.clone().into());
             match decl_type_cache {
                 Some(type_cache) => {
@@ -70,11 +91,7 @@ impl LuaGlobalIndex {
                         return Some(*decl_id);
                     }
 
-                    if let LuaType::Signature(signature_id) = typ {
-                        let semantic_id = LuaSemanticDeclId::Signature(*signature_id);
-                        if filter_global_by_scope(db, semantic_id, file_id, position).is_some() {
-                            continue;
-                        }
+                    if let LuaType::Signature(_) = typ {
                         return Some(*decl_id);
                     }
 
@@ -94,17 +111,58 @@ impl LuaGlobalIndex {
     }
 }
 
+fn lookup_global_decl_scope(db: &DbIndex, decl_id: LuaDeclId) -> Option<XmakeScope> {
+    if let Some(prop) = db
+        .get_property_index()
+        .get_property(&LuaSemanticDeclId::LuaDecl(decl_id))
+    {
+        if let Some(scope) = prop.scope {
+            return Some(scope);
+        }
+    }
+    let type_cache = db.get_type_index().get_type_cache(&decl_id.into())?;
+    if let LuaType::Signature(signature_id) = type_cache.as_type() {
+        let prop = db
+            .get_property_index()
+            .get_property(&LuaSemanticDeclId::Signature(*signature_id))?;
+        return prop.scope;
+    }
+    None
+}
+
+pub fn filter_global_decl_by_scope(
+    db: &DbIndex,
+    decl_id: LuaDeclId,
+    ctx: &PositionContext,
+) -> Option<()> {
+    let xmake_scope = lookup_global_decl_scope(db, decl_id)?;
+    apply_xmake_scope_filter(db, xmake_scope, ctx)
+}
+
 pub fn filter_global_by_scope(
     db: &DbIndex,
     semantic_id: LuaSemanticDeclId,
-    file_id: FileId,
-    position: TextSize,
+    ctx: &PositionContext,
 ) -> Option<()> {
     let property = db.get_property_index().get_property(&semantic_id)?;
-    let xmake_scope = property.scope.clone()?;
-    let xmake_targets = db.get_xmake_index().get_targets(file_id)?;
+    let xmake_scope = property.scope?;
+    apply_xmake_scope_filter(db, xmake_scope, ctx)
+}
+
+fn apply_xmake_scope_filter(
+    db: &DbIndex,
+    xmake_scope: XmakeScope,
+    ctx: &PositionContext,
+) -> Option<()> {
+    match xmake_scope {
+        XmakeScope::Script => return (!ctx.is_script_scope).then_some(()),
+        XmakeScope::Description => return ctx.is_script_scope.then_some(()),
+        _ => {}
+    }
+
+    let xmake_targets = db.get_xmake_index().get_targets(ctx.file_id)?;
     for xmake_target in xmake_targets {
-        if xmake_target.range.contains(position) {
+        if xmake_target.range.contains(ctx.position) {
             match (xmake_scope, xmake_target.kind) {
                 (XmakeScope::Package, x) if !x.is_package() => return Some(()),
                 (XmakeScope::Option, x) if !x.is_option() => return Some(()),

@@ -18,7 +18,7 @@ use super::{
 use crate::{
     CacheEntry, DbIndex, InFiled, LuaFunctionType, LuaGenericType, LuaInstanceType,
     LuaOperatorMetaMethod, LuaOperatorOwner, LuaSemanticDeclId, LuaSignatureId, LuaType,
-    LuaTypeDeclId, LuaUnionType, filter_global_by_scope,
+    LuaTypeDeclId, LuaUnionType, PositionContext, filter_global_by_scope,
 };
 use crate::{
     XmakeFunction, get_xmake_function,
@@ -456,11 +456,12 @@ fn infer_union(
     let mut base_signatures = Vec::new();
     let position = call_expr.get_position();
     let file_id = cache.get_file_id();
+    let ctx = PositionContext::new(db, file_id, position);
     for ty in union.into_vec() {
         match ty {
             LuaType::Signature(signature_id) => {
                 let semantic_id = LuaSemanticDeclId::Signature(signature_id);
-                if filter_global_by_scope(db, semantic_id, file_id, position).is_some() {
+                if filter_global_by_scope(db, semantic_id, &ctx).is_some() {
                     continue;
                 }
 

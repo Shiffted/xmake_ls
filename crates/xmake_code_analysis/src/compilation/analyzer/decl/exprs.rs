@@ -8,10 +8,11 @@ use crate::{
     FileId, InFiled, InferFailReason, LuaDeclExtra, LuaDeclId, LuaMemberFeature, LuaMemberId,
     LuaSignatureId,
     compilation::analyzer::{
-        decl::xmake_decl::analyze_xmake_function_call, unresolve::UnResolveTableField,
+        decl::xmake_decl::{analyze_xmake_callback_call, analyze_xmake_function_call},
+        unresolve::UnResolveTableField,
     },
     db_index::{LuaDecl, LuaMember, LuaMemberKey, LuaMemberOwner},
-    get_xmake_function,
+    get_xmake_function, is_xmake_callback_call,
 };
 
 use super::DeclAnalyzer;
@@ -341,6 +342,10 @@ pub fn analyze_call_expr(analyzer: &mut DeclAnalyzer, expr: LuaCallExpr) -> Opti
                     .add_required_file(file_id, module_file_id);
             }
         }
+    }
+
+    if is_xmake_callback_call(&expr) {
+        analyze_xmake_callback_call(analyzer, &expr);
     }
 
     let xmake_function = get_xmake_function(&expr)?;

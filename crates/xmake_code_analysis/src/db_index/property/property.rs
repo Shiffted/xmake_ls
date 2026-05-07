@@ -122,6 +122,8 @@ pub enum XmakeScope {
     Option,
     Rule,
     Task,
+    Description,
+    Script,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

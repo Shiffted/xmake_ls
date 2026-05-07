@@ -1,11 +1,13 @@
+use std::path::Path;
+
 use emmylua_parser::{
     LuaAstNode, LuaCallExpr, LuaCallExprStat, LuaExpr, LuaIndexKey, LuaLiteralToken, LuaStat,
 };
 use rowan::{TextRange, TextSize};
 
 use crate::{
-    LuaDecl, LuaDeclExtra, XmakeFunction, XmakeTarget, XmakeTargetKind,
-    compilation::analyzer::decl::DeclAnalyzer, get_xmake_function,
+    FileId, LuaDecl, LuaDeclExtra, XmakeFunction, XmakeTarget, XmakeTargetKind,
+    compilation::analyzer::decl::DeclAnalyzer, file_path_to_uri, get_xmake_function,
 };
 
 pub fn analyze_xmake_function_call(
@@ -19,6 +21,9 @@ pub fn analyze_xmake_function_call(
         }
         XmakeFunction::Includes => {
             analyze_includes(analyzer, call_expr);
+        }
+        XmakeFunction::AddModuleDirs => {
+            analyze_add_moduledirs(analyzer, call_expr);
         }
         XmakeFunction::Target => {
             analyze_target(analyzer, call_expr, XmakeTargetKind::Target);
@@ -37,6 +42,35 @@ pub fn analyze_xmake_function_call(
         }
         _ => {}
     }
+
+    Some(())
+}
+
+pub fn analyze_xmake_callback_call(
+    analyzer: &mut DeclAnalyzer,
+    call_expr: &LuaCallExpr,
+) -> Option<()> {
+    let arg_list = call_expr.get_args_list()?;
+    let first_arg = arg_list.get_args().next()?;
+    let LuaExpr::LiteralExpr(literal) = first_arg else {
+        return None;
+    };
+    let LuaLiteralToken::String(string_token) = literal.get_literal()? else {
+        return None;
+    };
+
+    let module_path = string_token.get_value();
+    let source_file_id = analyzer.get_file_id();
+    let module_info = analyzer.db.get_module_index().find_import(
+        &analyzer.db,
+        &module_path,
+        source_file_id,
+    )?;
+    let target_file_id = module_info.file_id;
+    analyzer
+        .db
+        .get_xmake_index_mut()
+        .add_script_scope_file(source_file_id, target_file_id);
 
     Some(())
 }
@@ -133,6 +167,61 @@ fn analyze_includes(analyzer: &mut DeclAnalyzer, call_expr: &LuaCallExpr) -> Opt
     analyzer.add_include_path(founded_module_info.file_id);
 
     Some(())
+}
+
+fn analyze_add_moduledirs(analyzer: &mut DeclAnalyzer, call_expr: &LuaCallExpr) -> Option<()> {
+    let arg_list = call_expr.get_args_list()?;
+    let source_file_id = analyzer.get_file_id();
+    let current_dir = analyzer
+        .db
+        .get_vfs()
+        .get_file_path(&source_file_id)?
+        .parent()?
+        .to_path_buf();
+
+    for arg in arg_list.get_args() {
+        let LuaExpr::LiteralExpr(literal) = arg else {
+            continue;
+        };
+        let Some(LuaLiteralToken::String(string_token)) = literal.get_literal() else {
+            continue;
+        };
+        let dir_path = current_dir.join(string_token.get_value());
+        mark_dir_as_script_scope(analyzer, source_file_id, &dir_path);
+    }
+
+    Some(())
+}
+
+fn mark_dir_as_script_scope(analyzer: &mut DeclAnalyzer, source_file_id: FileId, dir: &Path) {
+    let entries = match std::fs::read_dir(dir) {
+        Ok(entries) => entries,
+        Err(_) => return,
+    };
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let file_type = match entry.file_type() {
+            Ok(ft) => ft,
+            Err(_) => continue,
+        };
+        if file_type.is_dir() {
+            mark_dir_as_script_scope(analyzer, source_file_id, &path);
+            continue;
+        }
+        if path.extension().and_then(|e| e.to_str()) != Some("lua") {
+            continue;
+        }
+        let Some(uri) = file_path_to_uri(&path) else {
+            continue;
+        };
+        let Some(file_id) = analyzer.db.get_vfs().get_file_id(&uri) else {
+            continue;
+        };
+        analyzer
+            .db
+            .get_xmake_index_mut()
+            .add_script_scope_file(source_file_id, file_id);
+    }
 }
 
 fn analyze_target(

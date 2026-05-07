@@ -6,6 +6,7 @@ pub enum XmakeFunction {
     Includes,
     Import,
     AddDeps,
+    AddModuleDirs,
     Target,
     Package,
     Option,
@@ -30,6 +31,7 @@ pub fn get_xmake_function(call_expr: &LuaCallExpr) -> Option<XmakeFunction> {
         "includes" => Some(XmakeFunction::Includes),
         "import" => Some(XmakeFunction::Import),
         "add_deps" => Some(XmakeFunction::AddDeps),
+        "add_moduledirs" => Some(XmakeFunction::AddModuleDirs),
         "target" => Some(XmakeFunction::Target),
         "end_target" => Some(XmakeFunction::EndTarget),
         "package" => Some(XmakeFunction::Package),
@@ -42,4 +44,21 @@ pub fn get_xmake_function(call_expr: &LuaCallExpr) -> Option<XmakeFunction> {
         "end_task" => Some(XmakeFunction::EndTask),
         _ => return None,
     }
+}
+
+/// Whether `name` is an xmake script-scope callback registration like
+/// `on_load`, `before_build`, `after_install`. These take either a function
+/// or a string module name.
+pub fn is_xmake_callback_name(name: &str) -> bool {
+    name.starts_with("on_") || name.starts_with("before_") || name.starts_with("after_")
+}
+
+pub fn is_xmake_callback_call(call_expr: &LuaCallExpr) -> bool {
+    let Some(LuaExpr::NameExpr(name_expr)) = call_expr.get_prefix_expr() else {
+        return false;
+    };
+    let Some(name) = name_expr.get_name_text() else {
+        return false;
+    };
+    is_xmake_callback_name(&name)
 }

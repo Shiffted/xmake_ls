@@ -1353,4 +1353,123 @@ mod tests {
         ));
         Ok(())
     }
+
+    #[gtest]
+    fn test_scope_script_hidden_in_description() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope script
+function my_script_only_fn() end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                my_scrip<??>
+            "#,
+            vec![],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_scope_script_visible_inside_callback() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope script
+function my_script_only_fn() end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                on_load(function ()
+                    my_scrip<??>
+                end)
+            "#,
+            vec![VirtualCompletionItem {
+                label: "my_script_only_fn".to_string(),
+                kind: CompletionItemKind::FUNCTION,
+                label_detail: Some("()".to_string()),
+            },],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_scope_description_hidden_in_callback() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope description
+function my_description_only_fn() end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                on_load(function ()
+                    my_descrip<??>
+                end)
+            "#,
+            vec![],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_scope_script_hidden_in_nested_non_callback_closure() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope script
+function my_script_only_fn() end
+function not_a_callback(_f) end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                not_a_callback(function ()
+                    my_scrip<??>
+                end)
+            "#,
+            vec![],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_scope_script_visible_in_nested_callback_closure() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope script
+function my_script_only_fn() end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                on_load(function ()
+                    local inner = function ()
+                        my_scrip<??>
+                    end
+                end)
+            "#,
+            vec![VirtualCompletionItem {
+                label: "my_script_only_fn".to_string(),
+                kind: CompletionItemKind::FUNCTION,
+                label_detail: Some("()".to_string()),
+            },],
+        ));
+        Ok(())
+    }
 }
