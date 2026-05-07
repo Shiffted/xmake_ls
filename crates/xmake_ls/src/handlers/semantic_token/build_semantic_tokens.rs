@@ -11,8 +11,8 @@ use lsp_types::{SemanticToken, SemanticTokenModifier, SemanticTokenType};
 use rowan::{NodeOrToken, TextRange, TextSize};
 use xmake_code_analysis::{
     Emmyrc, LuaDecl, LuaDeclExtra, LuaMemberId, LuaMemberOwner, LuaSemanticDeclId, LuaType,
-    LuaTypeDeclId, SemanticDeclLevel, SemanticModel, check_export_visibility,
-    parse_require_module_info,
+    LuaTypeDeclId, PositionContext, SemanticDeclLevel, SemanticModel, check_export_visibility,
+    filter_type_by_scope, parse_require_module_info,
 };
 
 pub fn build_semantic_tokens(
@@ -489,6 +489,16 @@ fn build_node_semantic_token(
                 LuaExpr::NameExpr(name_expr) => {
                     let name = name_expr.get_name_token()?;
                     if let Some(prefix_type) = prefix_type {
+                        let ctx = PositionContext::new(
+                            semantic_model.get_db(),
+                            semantic_model.get_file_id(),
+                            name.syntax().text_range().start(),
+                        );
+                        if filter_type_by_scope(semantic_model.get_db(), &prefix_type, &ctx)
+                            .is_some()
+                        {
+                            return Some(());
+                        }
                         match prefix_type {
                             LuaType::Signature(signature) => {
                                 if semantic_model
@@ -813,19 +823,44 @@ fn handle_name_node(
                 return Some(());
             }
 
-            let (token_type, mut modifier) = match decl_type {
-                LuaType::Def(_) => (SemanticTokenType::CLASS, None),
-                LuaType::Ref(ref_id) => {
-                    if let Some(is_require) =
-                        check_ref_is_require_def(semantic_model, &decl, &ref_id)
-                    {
-                        if is_require {
-                            (
-                                SemanticTokenType::CLASS,
-                                Some(SemanticTokenModifier::READONLY),
-                            )
+            let ctx = PositionContext::new(
+                semantic_model.get_db(),
+                semantic_model.get_file_id(),
+                node.text_range().start(),
+            );
+            let scope_filtered =
+                filter_type_by_scope(semantic_model.get_db(), &decl_type, &ctx).is_some();
+            let (token_type, mut modifier) = if scope_filtered {
+                let base_type = if decl.is_param() {
+                    SemanticTokenType::PARAMETER
+                } else {
+                    SemanticTokenType::VARIABLE
+                };
+                (base_type, None)
+            } else {
+                match decl_type {
+                    LuaType::Def(_) => (SemanticTokenType::CLASS, None),
+                    LuaType::Ref(ref_id) => {
+                        if let Some(is_require) =
+                            check_ref_is_require_def(semantic_model, &decl, &ref_id)
+                        {
+                            if is_require {
+                                (
+                                    SemanticTokenType::CLASS,
+                                    Some(SemanticTokenModifier::READONLY),
+                                )
+                            } else {
+                                // 改进：根据声明类型选择更准确的token类型
+                                let base_type = if decl.is_param() {
+                                    SemanticTokenType::PARAMETER
+                                } else if decl.is_local() {
+                                    SemanticTokenType::VARIABLE
+                                } else {
+                                    SemanticTokenType::VARIABLE
+                                };
+                                (base_type, None)
+                            }
                         } else {
-                            // 改进：根据声明类型选择更准确的token类型
                             let base_type = if decl.is_param() {
                                 SemanticTokenType::PARAMETER
                             } else if decl.is_local() {
@@ -835,73 +870,64 @@ fn handle_name_node(
                             };
                             (base_type, None)
                         }
-                    } else {
-                        let base_type = if decl.is_param() {
-                            SemanticTokenType::PARAMETER
-                        } else if decl.is_local() {
-                            SemanticTokenType::VARIABLE
-                        } else {
-                            SemanticTokenType::VARIABLE
-                        };
-                        (base_type, None)
                     }
-                }
-                LuaType::Signature(signature) => {
-                    let is_meta = semantic_model
-                        .get_db()
-                        .get_module_index()
-                        .is_meta_file(&signature.get_file_id());
-                    (
-                        SemanticTokenType::FUNCTION,
-                        is_meta.then_some(SemanticTokenModifier::DEFAULT_LIBRARY),
-                    )
-                }
-                LuaType::DocFunction(_) => (SemanticTokenType::FUNCTION, None),
-                LuaType::Union(union) => {
-                    if union.into_vec().iter().any(|typ| typ.is_function()) {
-                        (SemanticTokenType::FUNCTION, None)
-                    } else {
-                        let base_type = if decl.is_param() {
-                            SemanticTokenType::PARAMETER
-                        } else if decl.is_local() {
-                            SemanticTokenType::VARIABLE
-                        } else {
-                            SemanticTokenType::VARIABLE
-                        };
-                        (base_type, None)
+                    LuaType::Signature(signature) => {
+                        let is_meta = semantic_model
+                            .get_db()
+                            .get_module_index()
+                            .is_meta_file(&signature.get_file_id());
+                        (
+                            SemanticTokenType::FUNCTION,
+                            is_meta.then_some(SemanticTokenModifier::DEFAULT_LIBRARY),
+                        )
                     }
-                }
-                _ => {
-                    let token_type = match &decl.extra {
-                        LuaDeclExtra::Param {
-                            idx, signature_id, ..
-                        } => {
-                            let signature = semantic_model
-                                .get_db()
-                                .get_signature_index()
-                                .get(&signature_id)?;
-                            if let Some(param_info) = signature.get_param_info_by_id(*idx) {
-                                if param_info.type_ref.is_function() {
-                                    SemanticTokenType::FUNCTION
-                                } else {
-                                    SemanticTokenType::PARAMETER
-                                }
-                            } else {
-                                SemanticTokenType::PARAMETER
-                            }
-                        }
-                        _ => {
-                            if decl.is_param() {
+                    LuaType::DocFunction(_) => (SemanticTokenType::FUNCTION, None),
+                    LuaType::Union(union) => {
+                        if union.into_vec().iter().any(|typ| typ.is_function()) {
+                            (SemanticTokenType::FUNCTION, None)
+                        } else {
+                            let base_type = if decl.is_param() {
                                 SemanticTokenType::PARAMETER
                             } else if decl.is_local() {
                                 SemanticTokenType::VARIABLE
                             } else {
                                 SemanticTokenType::VARIABLE
-                            }
+                            };
+                            (base_type, None)
                         }
-                    };
+                    }
+                    _ => {
+                        let token_type = match &decl.extra {
+                            LuaDeclExtra::Param {
+                                idx, signature_id, ..
+                            } => {
+                                let signature = semantic_model
+                                    .get_db()
+                                    .get_signature_index()
+                                    .get(&signature_id)?;
+                                if let Some(param_info) = signature.get_param_info_by_id(*idx) {
+                                    if param_info.type_ref.is_function() {
+                                        SemanticTokenType::FUNCTION
+                                    } else {
+                                        SemanticTokenType::PARAMETER
+                                    }
+                                } else {
+                                    SemanticTokenType::PARAMETER
+                                }
+                            }
+                            _ => {
+                                if decl.is_param() {
+                                    SemanticTokenType::PARAMETER
+                                } else if decl.is_local() {
+                                    SemanticTokenType::VARIABLE
+                                } else {
+                                    SemanticTokenType::VARIABLE
+                                }
+                            }
+                        };
 
-                    (token_type, None)
+                        (token_type, None)
+                    }
                 }
             };
 

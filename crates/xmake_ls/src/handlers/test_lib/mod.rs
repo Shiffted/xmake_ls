@@ -204,6 +204,16 @@ impl ProviderVirtualWorkspace {
         verify_eq!(value, expected.value)
     }
 
+    pub fn check_hover_none(&mut self, block_str: &str) -> Result<()> {
+        let (content, position) = Self::handle_file_content(block_str)?;
+        let file_id = self.def(&content);
+        let result = hover(&self.analysis, file_id, position);
+        if let Some(result) = result {
+            return fail!("expected no hover, got {result:?}");
+        }
+        Ok(())
+    }
+
     pub fn check_completion(
         &mut self,
         block_str: &str,

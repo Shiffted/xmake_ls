@@ -4,7 +4,9 @@ use emmylua_parser::{
     LuaAst, LuaAstNode, LuaCallArgList, LuaClosureExpr, LuaParamList, LuaTokenKind,
 };
 use lsp_types::{CompletionItem, CompletionItemKind, CompletionTriggerKind};
-use xmake_code_analysis::{LuaSignatureId, LuaType, PositionContext, filter_global_decl_by_scope};
+use xmake_code_analysis::{
+    LuaSignatureId, LuaType, PositionContext, filter_global_decl_by_scope, filter_type_by_scope,
+};
 
 use crate::handlers::completion::{
     add_completions::{add_decl_completion, check_match_word},
@@ -195,12 +197,9 @@ pub fn add_global_env(
                     .unwrap_or(LuaType::Unknown),
             )
         };
-        if filter_global_decl_by_scope(
-            builder.semantic_model.get_db(),
-            *decl_id,
-            &ctx,
-        )
-        .is_some()
+        let db = builder.semantic_model.get_db();
+        if filter_global_decl_by_scope(db, *decl_id, &ctx).is_some()
+            || filter_type_by_scope(db, &typ, &ctx).is_some()
         {
             continue;
         }

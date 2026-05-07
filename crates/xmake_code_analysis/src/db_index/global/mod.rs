@@ -5,7 +5,10 @@ use std::collections::HashMap;
 pub use global_id::GlobalId;
 use rowan::TextSize;
 
-use crate::{FileId, LuaSemanticDeclId, LuaType, XmakeScope, is_script_scope_position};
+use crate::{
+    FileId, LuaSemanticDeclId, LuaSignatureId, LuaType, TypeVisitTrait, XmakeScope,
+    is_script_scope_position,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct PositionContext {
@@ -139,6 +142,26 @@ pub fn filter_global_decl_by_scope(
     apply_xmake_scope_filter(db, xmake_scope, ctx)
 }
 
+pub fn filter_type_by_scope(
+    db: &DbIndex,
+    typ: &LuaType,
+    ctx: &PositionContext,
+) -> Option<()> {
+    let mut signatures: Vec<LuaSignatureId> = Vec::new();
+    typ.visit_type(&mut |t| {
+        if let LuaType::Signature(sig) = t {
+            signatures.push(*sig);
+        }
+    });
+    if signatures.is_empty() {
+        return None;
+    }
+    let all_filtered = signatures
+        .iter()
+        .all(|sig| filter_global_by_scope(db, LuaSemanticDeclId::Signature(*sig), ctx).is_some());
+    if all_filtered { Some(()) } else { None }
+}
+
 pub fn filter_global_by_scope(
     db: &DbIndex,
     semantic_id: LuaSemanticDeclId,
@@ -160,21 +183,26 @@ fn apply_xmake_scope_filter(
         _ => {}
     }
 
-    let xmake_targets = db.get_xmake_index().get_targets(ctx.file_id)?;
-    for xmake_target in xmake_targets {
-        if xmake_target.range.contains(ctx.position) {
-            match (xmake_scope, xmake_target.kind) {
-                (XmakeScope::Package, x) if !x.is_package() => return Some(()),
-                (XmakeScope::Option, x) if !x.is_option() => return Some(()),
-                (XmakeScope::Rule, x) if !x.is_rule() => return Some(()),
-                (XmakeScope::Target, x) if !x.is_target() => return Some(()),
-                (XmakeScope::Task, x) if !x.is_task() => return Some(()),
-                _ => {}
-            }
-        }
-    }
+    let containing_target = db
+        .get_xmake_index()
+        .get_targets(ctx.file_id)
+        .and_then(|targets| targets.iter().find(|t| t.range.contains(ctx.position)));
 
-    None
+    match containing_target {
+        Some(xmake_target) => match (xmake_scope, xmake_target.kind) {
+            (XmakeScope::Package, x) if !x.is_package() => Some(()),
+            (XmakeScope::Option, x) if !x.is_option() => Some(()),
+            (XmakeScope::Rule, x) if !x.is_rule() => Some(()),
+            (XmakeScope::Target, x) if !x.is_target() => Some(()),
+            (XmakeScope::Task, x) if !x.is_task() => Some(()),
+            _ => None,
+        },
+        // At the file top level only target-scoped functions are valid.
+        None => match xmake_scope {
+            XmakeScope::Target => None,
+            _ => Some(()),
+        },
+    }
 }
 
 impl LuaIndex for LuaGlobalIndex {

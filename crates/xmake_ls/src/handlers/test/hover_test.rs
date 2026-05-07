@@ -413,4 +413,19 @@ mod tests {
 
         Ok(())
     }
+
+    #[gtest]
+    fn test_hover_scope_filter_out_of_scope() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new_with_init_std_lib();
+        check!(ws.check_hover(
+            r#"
+                package("test")
+                    set_de<??>fault(false)
+            "#,
+            VirtualHoverResult {
+                value: "unknown".to_string(),
+            },
+        ));
+        Ok(())
+    }
 }
