@@ -630,6 +630,15 @@ impl LuaFunctionType {
         &self.params
     }
 
+    /// Index of the variadic `...` param in the param list, if any.
+    /// May be in the middle of the list when the signature uses the
+    /// xmake-style `fun(...: T, trailing?: U)` shape.
+    pub fn variadic_param_index(&self) -> Option<usize> {
+        self.params
+            .iter()
+            .position(|(name, t)| name == "..." || t.as_ref().map_or(false, |t| t.is_variadic()))
+    }
+
     pub fn get_ret(&self) -> &LuaType {
         &self.ret
     }

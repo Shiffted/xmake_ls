@@ -109,9 +109,83 @@ fn check_call_expr(
         }
     }
 
-    // 没必要检查
-    if fake_params.len() > 1 && fake_params.first()?.0 == "..." {
-        return None;
+    // Variadic at any position absorbs unspecified args; only the required
+    // leading and trailing fixed params constrain the call's arg count, and
+    // there is no upper bound, so RedundantParameter never applies.
+    if let Some(v_idx) = fake_params
+        .iter()
+        .position(|(name, typ)| name == "..." || typ.as_ref().map_or(false, |t| t.is_variadic()))
+    {
+        let leading_required = fake_params[..v_idx]
+            .iter()
+            .filter(|(_, t)| is_required(context.db, t, true))
+            .count();
+        let trailing_required = fake_params[v_idx + 1..]
+            .iter()
+            .filter(|(_, t)| is_required(context.db, t, false))
+            .count();
+        let min_required = leading_required + trailing_required;
+
+        if call_args_count >= min_required {
+            return Some(());
+        }
+
+        for arg in call_args.iter() {
+            if let LuaExpr::LiteralExpr(literal_expr) = arg {
+                if let Some(literal_token) = literal_expr.get_literal() {
+                    if let LuaLiteralToken::Dots(_) = literal_token {
+                        return Some(());
+                    }
+                }
+            }
+        }
+        if let Some(last_arg) = call_args.last() {
+            if let Ok(LuaType::Variadic(variadic)) = semantic_model.infer_expr(last_arg.clone()) {
+                let len = match variadic.get_max_len() {
+                    Some(len) => len,
+                    None => return Some(()),
+                };
+                if call_args_count + len as usize - 1 >= min_required {
+                    return Some(());
+                }
+            }
+        }
+
+        let mut miss_parameter_info = Vec::new();
+        for i in call_args_count..v_idx {
+            let param = &fake_params[i];
+            if is_required(context.db, &param.1, true) {
+                miss_parameter_info
+                    .push(t!("missing parameter: %{name}", name = param.0).to_string());
+            }
+        }
+        for param in fake_params[v_idx + 1..].iter() {
+            if is_required(context.db, &param.1, false) {
+                miss_parameter_info
+                    .push(t!("missing parameter: %{name}", name = param.0).to_string());
+            }
+        }
+
+        if !miss_parameter_info.is_empty() {
+            let right_paren = call_expr
+                .get_args_list()?
+                .tokens::<LuaGeneralToken>()
+                .last()?;
+            context.add_diagnostic(
+                DiagnosticCode::MissingParameter,
+                right_paren.get_range(),
+                t!(
+                    "expected %{num} parameters but found %{found_num}. %{infos}",
+                    num = min_required,
+                    found_num = call_args_count,
+                    infos = miss_parameter_info.join(" \n ")
+                )
+                .to_string(),
+                None,
+            );
+        }
+
+        return Some(());
     }
 
     // Check for missing parameters
@@ -180,18 +254,7 @@ fn check_call_expr(
     }
     // Check for redundant parameters
     else if call_args_count > fake_params.len() {
-        // 参数定义中最后一个参数是 `...`
-        if fake_params.last().map_or(false, |(name, typ)| {
-            name == "..."
-                || if let Some(typ) = typ {
-                    typ.is_variadic()
-                } else {
-                    false
-                }
-        }) {
-            return Some(());
-        }
-
+        // Variadic at any position is handled in the early-return branch above.
         let mut adjusted_index = 0;
         if colon_call != colon_define {
             adjusted_index = if colon_define && !colon_call { -1 } else { 1 };
@@ -234,6 +297,18 @@ fn get_params_len(params: &[(String, Option<LuaType>)]) -> Option<usize> {
         }
     }
     Some(params.len())
+}
+
+/// Whether a param is required (must be supplied by the caller).
+/// `default_when_missing` controls the answer when the param has no declared
+/// type: `true` for leading params (untyped means required), `false` for
+/// trailing-after-variadic (untyped means optional, since the variadic
+/// already absorbs args until this slot).
+fn is_required(db: &DbIndex, typ: &Option<LuaType>, default_when_missing: bool) -> bool {
+    match typ {
+        Some(t) => !is_nullable(db, t),
+        None => default_when_missing,
+    }
 }
 
 fn is_nullable(db: &DbIndex, typ: &LuaType) -> bool {

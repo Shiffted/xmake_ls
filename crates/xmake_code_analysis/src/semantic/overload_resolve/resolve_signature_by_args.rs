@@ -33,6 +33,11 @@ pub fn resolve_signature_by_args(
         }
     }
 
+    let v_indices: Vec<Option<usize>> = need_resolve_funcs
+        .iter()
+        .map(|opt| opt.as_ref().and_then(|f| f.variadic_param_index()))
+        .collect();
+
     let mut best_match_result = need_resolve_funcs[0].clone().unwrap();
     for arg_index in 0..expr_len {
         let mut current_match_result = ParamMatchResult::NotMatch;
@@ -42,42 +47,41 @@ pub fn resolve_signature_by_args(
                 continue;
             }
             let func = opt_func.as_ref().unwrap();
+            let v_idx = v_indices[i];
             let param_len = func.get_params().len();
-            if param_len < arg_count && !is_func_last_param_variadic(func) {
+            if param_len < arg_count && v_idx.is_none() {
                 need_resolve_funcs[i] = None;
                 continue;
             }
 
             let colon_define = func.is_colon_define();
             let mut param_index = arg_index;
+            let mut effective_arg_count = arg_count;
             match (colon_define, is_colon_call) {
                 (true, false) => {
                     if param_index == 0 {
                         continue;
                     }
                     param_index -= 1;
+                    effective_arg_count = effective_arg_count.saturating_sub(1);
                 }
                 (false, true) => {
                     param_index += 1;
+                    effective_arg_count += 1;
                 }
                 _ => {}
             }
             let expr_type = &expr_types[arg_index];
-            let param_type = if param_index < param_len {
-                let param_info = func.get_params().get(param_index);
-                param_info
+            let param_type = match pick_param_slot(func, v_idx, param_index, effective_arg_count) {
+                Some(slot) => func
+                    .get_params()
+                    .get(slot)
                     .map(|it| it.1.clone().unwrap_or(LuaType::Any))
-                    .unwrap_or(LuaType::Any)
-            } else if let Some(last_param_info) = func.get_params().last() {
-                if last_param_info.0 == "..." {
-                    last_param_info.1.clone().unwrap_or(LuaType::Any)
-                } else {
+                    .unwrap_or(LuaType::Any),
+                None => {
                     need_resolve_funcs[i] = None;
                     continue;
                 }
-            } else {
-                need_resolve_funcs[i] = None;
-                continue;
             };
 
             let match_result = if param_type.is_any() {
@@ -207,11 +211,54 @@ pub fn resolve_signature_by_args(
     Ok(best_match_result)
 }
 
-fn is_func_last_param_variadic(func: &LuaFunctionType) -> bool {
-    if let Some(last_param) = func.get_params().last() {
-        last_param.0 == "..."
+/// Map a (colon-adjusted) param index to a slot in the function's param list,
+/// accounting for `...` that may sit before fixed trailing params. `v_idx` is
+/// the cached variadic position from `variadic_param_index()`, and
+/// `effective_arg_count` is the colon-adjusted total arg count (must match the
+/// view that `param_index` is in).
+/// Returns `None` when the index falls outside the function's param shape
+/// (e.g. excess args for a non-variadic function).
+fn pick_param_slot(
+    func: &LuaFunctionType,
+    v_idx: Option<usize>,
+    param_index: usize,
+    effective_arg_count: usize,
+) -> Option<usize> {
+    let params = func.get_params();
+    let v_idx = match v_idx {
+        Some(i) => i,
+        None => {
+            return if param_index < params.len() {
+                Some(param_index)
+            } else {
+                None
+            };
+        }
+    };
+    let trailing = params.len() - v_idx - 1;
+
+    if param_index < v_idx {
+        return Some(param_index);
+    }
+    if trailing == 0 {
+        // Variadic at the end: it absorbs everything from v_idx onward.
+        return Some(v_idx);
+    }
+    let trailing_to_bind = trailing.min(effective_arg_count.saturating_sub(v_idx));
+    if trailing_to_bind == 0 {
+        return Some(v_idx);
+    }
+    let trailing_start = effective_arg_count - trailing_to_bind;
+    if param_index < trailing_start {
+        return Some(v_idx);
+    }
+    let last_slot = params.len() - 1;
+    let first_bound_slot = last_slot - (trailing_to_bind - 1);
+    let offset = param_index - trailing_start;
+    if offset < trailing_to_bind {
+        Some(first_bound_slot + offset)
     } else {
-        false
+        None
     }
 }
 

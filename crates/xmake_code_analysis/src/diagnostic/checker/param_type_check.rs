@@ -59,11 +59,21 @@ fn check_call_expr(
         }
     }
 
+    // Variadic-then-fixed: only right-anchor (reverse) when the last arg's
+    // type actually fits the trailing slot — otherwise the last arg should
+    // fold back into the variadic, not be force-bound to the trailing param.
     if params.len() > 1 && params.first()?.0 == "..." {
-        // 可变参数在前面, 则反向检查
-        params.reverse();
-        arg_types.reverse();
-        arg_ranges.reverse();
+        let trailing_fits = match (params.last(), arg_types.last()) {
+            (Some((_, Some(trailing_t))), Some(arg_t)) => {
+                semantic_model.type_check(trailing_t, arg_t).is_ok()
+            }
+            _ => true,
+        };
+        if trailing_fits {
+            params.reverse();
+            arg_types.reverse();
+            arg_ranges.reverse();
+        }
     }
 
     for (idx, param) in params.iter().enumerate() {

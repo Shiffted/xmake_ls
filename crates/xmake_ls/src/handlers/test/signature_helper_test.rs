@@ -24,6 +24,57 @@ mod tests {
         Ok(())
     }
 
+    /// Variadic-then-fixed: cursor at the first arg position should highlight
+    /// the variadic slot, and the rendered label should preserve param order.
+    #[gtest]
+    fn test_variadic_then_fixed_first_arg() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        check!(ws.check_signature_helper(
+            r#"
+                ---@class AccessSpecifier
+
+                ---@class Target
+                ---@field add_rules fun(...: string, options?: AccessSpecifier): nil
+                target = {}
+
+                target.add_rules(<??>)
+            "#,
+            VirtualSignatureHelp {
+                target_label: "Target.add_rules(...: string, options: AccessSpecifier?)"
+                    .to_string(),
+                active_signature: 0,
+                active_parameter: 0,
+            },
+        ));
+        Ok(())
+    }
+
+    /// Variadic-then-fixed: cursor past the variadic position should still
+    /// highlight the variadic slot (we cannot know mid-typing whether the
+    /// next arg will be a string or the trailing options value).
+    #[gtest]
+    fn test_variadic_then_fixed_past_variadic() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        check!(ws.check_signature_helper(
+            r#"
+                ---@class AccessSpecifier
+
+                ---@class Target
+                ---@field add_rules fun(...: string, options?: AccessSpecifier): nil
+                target = {}
+
+                target.add_rules("a", "b", <??>)
+            "#,
+            VirtualSignatureHelp {
+                target_label: "Target.add_rules(...: string, options: AccessSpecifier?)"
+                    .to_string(),
+                active_signature: 0,
+                active_parameter: 0,
+            },
+        ));
+        Ok(())
+    }
+
     #[gtest]
     fn test_2() -> Result<()> {
         let mut ws = ProviderVirtualWorkspace::new_with_init_std_lib();

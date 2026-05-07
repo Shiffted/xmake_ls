@@ -133,11 +133,7 @@ fn build_doc_function_signature_help(
         _ => {}
     }
 
-    if let Some((name, _)) = params.last() {
-        if name == "..." && current_idx >= params.len() {
-            current_idx = params.len() - 1;
-        }
-    }
+    current_idx = clamp_variadic_idx(&params, current_idx);
 
     let label = build_function_label(
         builder,
@@ -230,11 +226,7 @@ fn build_sig_id_signature_help(
         _ => {}
     }
 
-    if let Some((name, _)) = params.last() {
-        if name == "..." && current_idx >= params.len() {
-            current_idx = params.len() - 1;
-        }
-    }
+    current_idx = clamp_variadic_idx(&params, current_idx);
 
     let label = build_function_label(
         builder,
@@ -469,6 +461,24 @@ pub fn build_function_label(
     }
 
     label
+}
+
+/// When the cursor sits at or past a `...` slot, anchor the highlight on the
+/// variadic. We can't tell mid-typing whether the user is in the variadic or
+/// a trailing fixed slot, so the variadic is the safer default — the rendered
+/// label still shows the trailing params for context.
+fn clamp_variadic_idx(params: &[(String, Option<LuaType>)], current_idx: usize) -> usize {
+    let Some(v_idx) = params
+        .iter()
+        .position(|(n, t)| n == "..." || t.as_ref().map_or(false, |t| t.is_variadic()))
+    else {
+        return current_idx;
+    };
+    if current_idx >= v_idx {
+        v_idx
+    } else {
+        current_idx
+    }
 }
 
 pub fn generate_param_label(db: &DbIndex, param: (String, Option<LuaType>)) -> String {
