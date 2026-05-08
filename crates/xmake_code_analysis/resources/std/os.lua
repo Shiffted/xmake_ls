@@ -1,26 +1,8 @@
 ---@meta
--- Copyright (c) 2018. tangzx(love.tangzx@qq.com)
---
--- Licensed under the Apache License, Version 2.0 (the "License"); you may not
--- use this file except in compliance with the License. You may obtain a copy of
--- the License at
---
--- http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
--- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
--- License for the specific language governing permissions and limitations under
--- the License.
+---[os](https://xmake.io/api/scripts/builtin-modules/os)
 
 ---@class oslib
 os = {}
-
----
---- Returns an approximation of the amount in seconds of CPU time used by
---- the program.
----@return number
-function os.clock() end
 
 ---@class std.osdate
 ---@field year integer|string? four digits
@@ -32,6 +14,107 @@ function os.clock() end
 ---@field wday integer|string? 1-7, Sunday is 1
 ---@field yday integer|string? 1-366
 ---@field isdst boolean? daylight saving flag, a boolean.
+
+---
+--- Add values to one environment variable.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-addenv)
+---@scope script
+---@param name string Environment variable name
+---@param value string Value to add
+---@return any ... -- ToDo
+function os.addenv(name, value) end
+
+---
+--- Add values to one environment variable with a given separator.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-addenvp)
+---@scope script
+---@param name string Environment variable name
+---@param value string Value to add
+---@param separator string Separator string
+---@return any ... -- ToDo
+function os.addenvp(name, value, separator) end
+
+---
+--- Add environment variables to current envs, return the all old envs.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-addenvs)
+---@scope script
+---@param envs table Environment variables table to add
+---@return any ... -- ToDo
+function os.addenvs(envs) end
+
+---
+--- Get current system architecture.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-arch)
+---@return any ... -- ToDo
+function os.arch() end
+
+---
+--- Convert argument list to command line string.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-args)
+---@scope script
+---@param args any[] Arguments array
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function os.args(args, options) end
+
+---
+--- Parse command line string into argument list.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-argv)
+---@scope script
+---@param command string Command line string
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function os.argv(command, options) end
+
+---
+--- Register an exit callback function.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-atexit)
+---@scope script
+---@param on_exit function Callback function to execute on exit
+---@return any ... -- ToDo
+function os.atexit(on_exit) end
+
+---
+--- Enter the specified directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-cd)
+---@scope script
+---@param path string Directory path
+---@return any ... -- ToDo
+function os.cd(path) end
+
+---
+--- Copy files or directories.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-cp)
+---@scope script
+---@param source string Source path or pattern
+---@param destination string Destination path
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function os.cp(source, destination, options) end
+
+---
+--- Get cpu information.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-cpuinfo)
+---@param key string CPU info key (optional)
+---@return any ... -- ToDo
+function os.cpuinfo(key) end
+
+---
+--- Get the current directory path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-curdir)
+---@return any ... -- ToDo
+function os.curdir() end
 
 ---
 --- Returns a string or a table containing date and time, formatted according
@@ -65,6 +148,7 @@ function os.clock() end
 ---
 --- On non-POSIX systems, this function may be not thread safe because of its
 --- reliance on C function `gmtime` and C function `localtime`.
+---
 ---@overload fun(fmt:"*t", time: number):table
 ---@overload fun(fmt:"!*t", time: number):table
 ---@param format string
@@ -73,125 +157,505 @@ function os.clock() end
 function os.date(format, time) end
 
 ---
---- Returns the difference, in seconds, from time `t1` to time `t2`. (where the
---- times are values returned by `os.time`). In POSIX, Windows, and some other
---- systems, this value is exactly `t2`-`t1`.
----@param t2 number
----@param t1 number
----@return number
-function os.difftime(t2, t1) end
+--- Get default parallel jobs.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-default_njob)
+---@return any ... -- ToDo
+function os.default_njob() end
 
---- @version > 5.2
 ---
---- This function is equivalent to the C function `system`. It passes `command`
---- to be executed by an operating system shell. Its first result is **true** if
---- the command terminated successfully, or **nil** otherwise. After this first
---- result the function returns a string plus a number, as follows:
+--- Traverse to get all the directories under the specified directory.
 ---
---- **"exit"**: the command terminated normally; the following number is the
---- exit status of the command.
---- **"signal"**: the command was terminated by a signal; the following number
---- is the signal that terminated the command.
----
---- When called without a command, `os.execute` returns a boolean that is true
---- if a shell is available.
---- @overload fun():boolean
---- @param command string
---- @return true|nil
---- @return 'exit'|'signal'
---- @return integer
-function os.execute(command) end
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-dirs)
+---@param pattern string File pattern
+---@return any ... -- ToDo
+function os.dirs(pattern) end
 
---- @version 5.1, JIT
 ---
---- This function is equivalent to the C function system. It passes command to
---- be executed by an operating system shell. It returns a status code, which is
---- system-dependent. If command is absent, then it returns nonzero if a shell
---- is available and zero otherwise.
---- @param command string
---- @return integer
-function os.execute(command) end
+---TODO: document `os.emptydir`.
+---@scope script
+---@return any ... -- ToDo
+function os.emptydir(...) end
 
---- @version > 5.2, JIT
 ---
---- Calls the ISO C function `exit` to terminate the host program. If `code` is
---- **true**, the returned status is `EXIT_SUCCESS`; if `code` is **false**, the
---- returned status is `EXIT_FAILURE`; if `code` is a number, the returned
---- status is this number. The default value for `code` is **true**.
+--- Echo running native shell commands.
 ---
---- If the optional second argument `close` is true, closes the Lua state before
---- exiting.
----@param code integer
----@param close? boolean
----@return integer
-function os.exit(code, close) end
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-exec)
+---@scope script
+---@param command string Command string
+---@param ... any Variable arguments for command
+---@return any ... -- ToDo
+function os.exec(command, ...) end
 
---- @version 5.1
 ---
---- Calls the C function exit, with an optional `code`, to terminate the host
---- program. The default value for `code` is the success code.
----@param code integer
----@return integer
+--- Echo running native shell commands with parameter list.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-execv)
+---@scope script
+---@param program string Program name
+---@param args table Arguments table
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function os.execv(program, args, options) end
+
+---
+--- Determine if a file or directory exists.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-exists)
+---@param path string File or directory path
+---@return any ... -- ToDo
+function os.exists(path) end
+
+---
+--- Exit the program.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-exit)
+---@scope script
+---@param code number Exit code
+---@return any ... -- ToDo
 function os.exit(code) end
 
 ---
---- Returns the value of the process environment variable `varname`, or
---- **nil** if the variable is not defined.
----@param varname string
----@return string?
-function os.getenv(varname) end
+--- Get features.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-features)
+---@scope script
+---@return any ... -- ToDo
+function os.features() end
 
 ---
---- Deletes the file (or empty directory, on POSIX systems) with the given name.
---- If this function fails, it returns **nil**, plus a string describing the
---- error and the error code. Otherwise, it returns true.
----@param filename string
----@return true|nil result
----@return string err
-function os.remove(filename) end
+--- Traverse to get all files and directories under the specified directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-filedirs)
+---@param pattern string File pattern
+---@return any ... -- ToDo
+function os.filedirs(pattern) end
 
 ---
---- Renames the file or directory named `oldname` to `newname`. If this function
---- fails, it returns **nil**, plus a string describing the error and the error
---- code. Otherwise, it returns true.
----@param oldname string
----@param newname string
----@return true|nil result
----@return string err
-function os.rename(oldname, newname) end
+--- Traverse to get all the files in the specified directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-files)
+---@param pattern string File pattern
+---@param options? table
+---@return any ... -- ToDo
+function os.files(pattern, options?) end
 
 ---
---- Sets the current locale of the program. `locale` is a system-dependent
---- string specifying a locale; `category` is an optional string describing
---- which category to change: `"all"`, `"collate"`, `"ctype"`, `"monetary"`,
---- `"numeric"`, or `"time"`; the default category is `"all"`. The function
---- returns the name of the new locale, or **nil** if the request cannot be
---- honored.
+--- Get file size.
 ---
---- If `locale` is the empty string, the current locale is set to an
---- implementation-defined native locale. If `locale` is the string "`C`",
---- the current locale is set to the standard C locale.
----
---- When called with **nil** as the first argument, this function only returns
---- the name of the current locale for the given category.
----
---- This function may be not thread safe because of its reliance on C function
---- `setlocale`.
----@param locale string
----@param category? string
----@return string|nil
-function os.setlocale(locale, category) end
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-filesize)
+---@param filepath string File path
+---@return any ... -- ToDo
+function os.filesize(filepath) end
 
----@class std.osdateparam
----@field year integer|string four digits
----@field month integer|string 1-12
----@field day integer|string 1-31
----@field hour (integer|string)? 0-23
----@field min (integer|string)? 0-59
----@field sec (integer|string)? 0-61, due to leap seconds
----@field wday (integer|string)? 1-7, Sunday is 1
----@field yday (integer|string)? 1-366
----@field isdst boolean? daylight saving flag, a boolean.
+---
+--- Test if the os has a case sensitive filesystem.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-fscase)
+---@scope script
+---@return any ... -- ToDo
+function os.fscase() end
+
+---
+--- Get system environment variables.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-getenv)
+---@param name string Environment variable name
+---@return any ... -- ToDo
+function os.getenv(name) end
+
+---
+--- Get all current environment variables.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-getenvs)
+---@scope script
+---@return any ... -- ToDo
+function os.getenvs() end
+
+---
+--- Get the current process ID.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-getpid)
+---@scope script
+---@return any ... -- ToDo
+function os.getpid() end
+
+---
+---TODO: document `os.getwinsize`.
+---@scope script
+---@return any ... -- ToDo
+function os.getwinsize(...) end
+
+---
+--- Get the operating system of the current host.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-host)
+---@return any ... -- ToDo
+function os.host() end
+
+---
+--- Quietly running native shell commands and getting output.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-iorun)
+---@scope script
+---@param command string Command string
+---@param ... any Variable arguments for command
+---@return any ... -- ToDo
+function os.iorun(command, ...) end
+
+---
+--- Run the native shell command quietly and get the output with a list of parameters.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-iorunv)
+---@scope script
+---@param program string Program name
+---@param args table Arguments table
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function os.iorunv(program, args, options) end
+
+---
+--- Test if a given arch is the current.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-is_arch)
+---@scope script
+---@param ... string Architecture names
+---@return any ... -- ToDo
+function os.is_arch(arch, ...) end
+
+---
+--- Test if a given host is the current.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-is_host)
+---@scope script
+---@param ... string Host names
+---@return any ... -- ToDo
+function os.is_host(...) end
+
+---
+--- Test if a given sub arch is the current.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-is_subarch)
+---@scope script
+---@param ... string Sub architecture names
+---@return any ... -- ToDo
+function os.is_subarch(subarch, ...) end
+
+---
+--- Test if a given sub host is the current.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-is_subhost)
+---@scope script
+---@param ... string Sub host names
+---@return any ... -- ToDo
+function os.is_subhost(...) end
+
+---
+--- Determine if it is a directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-isdir)
+---@param path string Directory path
+---@return any ... -- ToDo
+function os.isdir(path) end
+
+---
+--- Test if a file is executable.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-isexec)
+---@scope script
+---@param path string File path
+---@return any ... -- ToDo
+function os.isexec(path) end
+
+---
+--- Determine if it is a file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-isfile)
+---@param path string File path
+---@return any ... -- ToDo
+function os.isfile(path) end
+
+---
+--- Determine if it is a symbolic link.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-islink)
+---@scope script
+---@param path string Symbolic link path
+---@return any ... -- ToDo
+function os.islink(path) end
+
+---
+--- Test if xmake is running as root.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-isroot)
+---@scope script
+---@return any ... -- ToDo
+function os.isroot() end
+
+---
+--- Join environment variables. Similar to [os.addenvs](#os-addenvs) but with two envs variable.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-joinenvs)
+---@scope script
+---@param envs1 table First environment variables table
+---@param envs2 table Second environment variables table
+---@return any ... -- ToDo
+function os.joinenvs(envs1, envs2) end
+
+---
+--- Create a symlink to a file or directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-ln)
+---@scope script
+---@param source string Source file or directory path
+---@param target string Target symlink path
+---@return any ... -- ToDo
+function os.ln(source, target) end
+
+---
+---TODO: document `os.match`.
+---@scope script
+---@return any ... -- ToDo
+function os.match(...) end
+
+---
+--- Get monotonic clock time (milliseconds).
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-mclock)
+---@return any ... -- ToDo
+function os.mclock() end
+
+---
+--- Get memory information.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-meminfo)
+---@scope script
+---@param key string Memory info key (optional)
+---@return any ... -- ToDo
+function os.meminfo(key) end
+
+---
+--- Create a directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-mkdir)
+---@scope script
+---@param path string Directory path
+---@param ... any Variable arguments, can pass multiple directory paths
+---@return any ... -- ToDo
+function os.mkdir(path, ...) end
+
+---
+--- Get modification time
+---
+---@param path string
+---@return integer|nil
+function os.mtime(...) end
+
+---
+--- Move to rename a file or directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-mv)
+---@scope script
+---@param source string Source path or pattern
+---@param destination string Destination path
+---@return any ... -- ToDo
+function os.mv(source, destination) end
+
+---
+--- Get the null device path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-nuldev)
+---@scope script
+---@param input? boolean
+---@return any ... -- ToDo
+function os.nuldev(input?) end
+
+---
+--- Copy content to the system clipboard.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-pbcopy)
+---@scope script
+---@param data string String to copy to clipboard
+---@return any ... -- ToDo
+function os.pbcopy(data) end
+
+---
+--- Get content from the system clipboard.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-pbpaste)
+---@scope script
+---@return any ... -- ToDo
+function os.pbpaste() end
+
+---
+--- Get the xmake installation main program script directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-programdir)
+---@return any ... -- ToDo
+function os.programdir() end
+
+---
+--- Get the path of the xmake executable.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-programfile)
+---@return any ... -- ToDo
+function os.programfile() end
+
+---
+--- Get the project home directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-projectdir)
+---@return any ... -- ToDo
+function os.projectdir() end
+
+---
+--- Get the project file path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-projectfile)
+---@return any ... -- ToDo
+function os.projectfile() end
+
+---
+--- Raise an exception and abort the current script.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-raise)
+---@scope script
+---@param message string Error message
+---@return any ... -- ToDo
+function os.raise(message) end
+
+---
+--- Read the content of a symlink.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-readlink)
+---@scope script
+---@param path string Symlink path
+---@return any ... -- ToDo
+function os.readlink(path) end
+
+---
+--- Delete files or directory trees.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-rm)
+---@scope script
+---@param path string File or directory path
+---@param options? table
+---@return any ... -- ToDo
+function os.rm(path, options?) end
+
+---
+--- delete only the directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-rmdir)
+---@scope script
+---@param path string Directory path
+---@return any ... -- ToDo
+function os.rmdir(path) end
+
+---
+--- Quietly running native shell commands.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-run)
+---@scope script
+---@param command string Command string
+---@param ... any Variable arguments for command
+---@return any ... -- ToDo
+function os.run(command, ...) end
+
+---
+--- Quietly running native shell commands with parameter list.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-runv)
+---@scope script
+---@param program string Program name
+---@param args table Arguments table
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function os.runv(program, args, options) end
+
+---
+--- Get the path of the current description script.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-scriptdir)
+---@return any ... -- ToDo
+function os.scriptdir() end
+
+---
+--- Set system environment variables.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-setenv)
+---@scope script
+---@param name string Environment variable name
+---@param value string Environment variable value
+---@return any ... -- ToDo
+function os.setenv(name, value) end
+
+---
+--- Setting environment variables with a given separator.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-setenvp)
+---@scope script
+---@param name string Environment variable name
+---@param value string Environment variable value
+---@param separator string Separator string
+---@return any ... -- ToDo
+function os.setenvp(name, value, separator) end
+
+---
+--- Set environment variables. Replace the current envs by a new one and return old envs.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-setenvs)
+---@scope script
+---@param envs table Environment variables table
+---@return any ... -- ToDo
+function os.setenvs(envs) end
+
+---
+--- Get current shell  (pwsh, cmd, ...).
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-shell)
+---@scope script
+---@return any ... -- ToDo
+function os.shell() end
+
+--- Sleep for specified time
+---
+---@scope script
+---@param ms integer milliseconds
+function os.sleep(ms) end
+
+---
+---TODO: document `os.strerror`.
+---@scope script
+---@return any ... -- ToDo
+function os.strerror(...) end
+
+---
+--- Get Subsystem host architecture.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-subarch)
+---@return any ... -- ToDo
+function os.subarch() end
+
+---
+--- Get Subsystem host.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-subhost)
+---@return any ... -- ToDo
+function os.subhost() end
+
+---
+---TODO: document `os.syserror`.
+---@scope script
+---@return any ... -- ToDo
+function os.syserror(...) end
+
+---
+--- Get current terminal (windows-terminal, vscode, ... ).
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-term)
+---@return any ... -- ToDo
+function os.term() end
 
 ---
 --- Returns the current time when called without arguments, or a time
@@ -215,295 +679,83 @@ function os.setlocale(locale, category) end
 --- When called with a table, `os.time` also normalizes all the fields
 --- documented in the `os.date` function, so that they represent the same time
 --- as before the call but with values inside their valid ranges.
+---
 ---@param date? std.osdateparam
 ---@return integer
 function os.time(date) end
 
 ---
---- Returns a string with a file name that can be used for a temporary
---- file. The file must be explicitly opened before its use and explicitly
---- removed when no longer needed.
+--- Get temporary directory.
 ---
---- On some systems (POSIX), this function also creates a file with that
---- name, to avoid security risks. (Someone else might create the file with
---- wrong permissions in the time between getting the name and creating the
---- file.) You still have to open the file to use it and to remove it (even
---- if you do not use it).
----
---- When possible, you may prefer to use `io.tmpfile`, which automatically
---- removes the file when the program ends.
----@return string
-function os.tmpname() end
-
----
---- **xmake extension**
---- Check if the file or directory exists
----@param path string
----@return boolean
-function os.exists(path) end
-
----
---- **xmake extension**
---- Check if path is a file
----@param path string
----@return boolean
-function os.isfile(path) end
-
----
---- **xmake extension**
---- Check if path is a directory
----@param path string
----@return boolean
-function os.isdir(path) end
-
----
---- **xmake extension**
---- Check if path is a symbolic link
----@param path string
----@return boolean
-function os.islink(path) end
-
----
---- **xmake extension**
---- Check if path is an executable program (checks common suffixes on Windows).
----@param path string
----@return boolean
-function os.isexec(path) end
-
----
---- **xmake extension**
---- Create directory
----@param dir string
----@return boolean
-function os.mkdir(dir) end
-
----
---- **xmake extension**
---- Remove directory recursively
----@param dir string
----@return boolean
-function os.rmdir(dir) end
-
----
---- **xmake extension**
---- Copy file or directory
----@param src string
----@param dst string
----@return boolean
-function os.cp(src, dst) end
-
----
---- **xmake extension**
---- Move/rename file or directory
----@param src string
----@param dst string
----@return boolean
-function os.mv(src, dst) end
-
----
---- **xmake extension**
---- Remove file or directory
----@param path string
----@return boolean
-function os.rm(path) end
-
----
---- **xmake extension**
---- Create or update file timestamp (like touch). Creates parent dirs if needed.
----@param path string
----@param opt? table
----@return boolean
-function os.touch(path, opt) end
-
----
---- **xmake extension**
---- Get file size
----@param path string
----@return integer|nil
-function os.filesize(path) end
-
----
---- **xmake extension**
---- Get modification time
----@param path string
----@return integer|nil
-function os.mtime(path) end
-
----
---- **xmake extension**
---- Monotonic clock in milliseconds.
----@return integer
-function os.mclock() end
-
----
---- **xmake extension**
---- Get current working directory
----@return string
-function os.curdir() end
-
----
---- **xmake extension**
---- Get temporary directory
----@return string
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-tmpdir)
+---@return any ... -- ToDo
 function os.tmpdir() end
 
 ---
---- **xmake extension**
---- Get a unique temporary file path.
----@param key? string
----@param opt? table
----@return string
-function os.tmpfile(key, opt) end
+--- Get temporary file path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-tmpfile)
+---@scope script
+---@return any ... -- ToDo
+function os.tmpfile() end
 
 ---
---- **xmake extension**
---- Get program directory
----@return string
-function os.programdir() end
+--- Create an empty file or update file timestamp.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-touch)
+---@scope script
+---@param path string File path
+---@param ... any Variable arguments, can pass multiple file paths
+---@return any ... -- ToDo
+function os.touch(path, ...) end
 
 ---
---- **xmake extension**
---- Get program file path
----@return string
-function os.programfile() end
+--- Try copying files or directories.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-trycp)
+---@scope script
+---@param source string Source path or pattern
+---@param destination string Destination path
+---@return any ... -- ToDo
+function os.trycp(source, destination) end
 
 ---
---- **xmake extension**
---- Get xmake working directory (internal runtime cwd).
----@return string
-function os.workingdir() end
+--- Try moving a file or directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-trymv)
+---@scope script
+---@param source string Source path or pattern
+---@param destination string Destination path
+---@return any ... -- ToDo
+function os.trymv(source, destination) end
 
 ---
---- **xmake extension**
---- Get script directory
----@return string
-function os.scriptdir() end
+--- Try deleting files or directories.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-tryrm)
+---@scope script
+---@param path string File or directory path
+---@return any ... -- ToDo
+function os.tryrm(path) end
 
 ---
---- **xmake extension**
---- Get xmake version string, e.g. "2.9.5"
----@return string
-function os.xmakever() end
+---TODO: document `os.vcp`.
+---@scope script
+---@return any ... -- ToDo
+function os.vcp(...) end
 
----
---- **xmake extension**
---- Get host operating system
----@return string
-function os.host() end
-
----
---- **xmake extension**
---- Get host architecture
----@return string
-function os.arch() end
-
----
---- **xmake extension**
---- Get sub-host information
----@return string
-function os.subhost() end
-
----
---- **xmake extension**
---- Get sub-architecture information
----@return string
-function os.subarch() end
-
----
---- **xmake extension**
---- Change directory
----@param dir string
----@return boolean
-function os.cd(dir) end
-
----
---- **xmake extension**
---- Execute command and return output
----@param cmd string
----@param opt? table
----@return boolean ok
----@return string|nil stdout
----@return string|nil stderr
----@return string? errors
-function os.iorun(cmd, opt) end
-
----
---- **xmake extension**
---- Execute command and return output with environment
----@param program string
----@param argv table
----@param opt? table
----@return boolean ok
----@return string|nil stdout
----@return string|nil stderr
----@return string? errors
-function os.iorunv(program, argv, opt) end
-
----
---- **xmake extension**
---- Run command and return exit code
----@param cmd string
----@return boolean ok
----@return string? errors
-function os.run(cmd) end
-
----
---- **xmake extension**
---- Run command with arguments and return exit code
----@param program string
----@param argv table
----@param opt? table
----@return boolean ok
----@return string? errors
-function os.runv(program, argv, opt) end
-
----
---- **xmake extension**
---- Execute command and return output
----@param cmd string
----@return integer|nil code
----@return string? errors
-function os.exec(cmd) end
-
----
---- **xmake extension**
---- Execute command with arguments and return output
----@param program string
----@param argv table
----@param opt? table
----@return integer|nil code
----@return string? errors
-function os.execv(program, argv, opt) end
-
----
---- **xmake extension**
---- Verbosely run command (print command before running)
----@param cmd string
----@return boolean ok
----@return string? errors
-function os.vrun(cmd) end
-
----
---- **xmake extension**
---- Verbosely run program with arguments
----@param program string
----@param argv table
----@param opt? table
----@return boolean ok
----@return string? errors
-function os.vrunv(program, argv, opt) end
-
----
---- **xmake extension**
 --- Verbosely execute command and return exit code
+---
+---@scope script
 ---@param cmd string
 ---@return integer|nil code
 ---@return string? errors
 function os.vexec(cmd) end
 
 ---
---- **xmake extension**
 --- Verbosely execute program with arguments and return exit code
+---
+---@scope script
 ---@param program string
 ---@param argv table
 ---@param opt? table
@@ -512,140 +764,54 @@ function os.vexec(cmd) end
 function os.vexecv(program, argv, opt) end
 
 ---
---- **xmake extension**
---- Find executable program in PATH
----@param name string
----@return string|nil
-function os.which(name) end
+---TODO: document `os.vln`.
+---@scope script
+---@return any ... -- ToDo
+function os.vln(...) end
 
 ---
---- **xmake extension**
---- List directory contents
----@param dir string
----@param recursively? boolean
----@param pattern? string
----@return string[]
-function os.dirs(dir, recursively, pattern) end
+---TODO: document `os.vmv`.
+---@scope script
+---@return any ... -- ToDo
+function os.vmv(...) end
 
 ---
---- **xmake extension**
---- List files in directory
----@param dir string
----@param recursively? boolean
----@param pattern? string
----@return string[]
-function os.files(dir, recursively, pattern) end
+---TODO: document `os.vrm`.
+---@scope script
+---@return any ... -- ToDo
+function os.vrm(...) end
 
 ---
---- **xmake extension**
---- Raise an exception
----@param message string
----@param level? integer
-function os.raise(message, level) end
+--- Verbosely run command (print command before running)
+---
+---@scope script
+---@param cmd string
+---@return boolean ok
+---@return string? errors
+function os.vrun(cmd) end
 
 ---
---- **xmake extension**
---- Raise an exception with stack level offset. Prefer `os.raise` in user code.
----@param level integer
----@param message string
----@param ... any
-function os.raiselevel(level, message, ...) end
+--- Verbosely run program with arguments
+---
+---@scope script
+---@param program string
+---@param argv table
+---@param opt? table
+---@return boolean ok
+---@return string? errors
+function os.vrunv(program, argv, opt) end
 
 ---
---- **xmake extension**
---- Try to execute function and catch exception
----@param func function
----@return any, string?
-function os.trybool(func) end
+--- Get the working directory.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-workingdir)
+---@scope script
+---@return any ... -- ToDo
+function os.workingdir() end
 
 ---
---- **xmake extension**
---- Sleep for specified time
----@param ms integer milliseconds
-function os.sleep(ms) end
-
+--- Get xmake version string, e.g. "2.9.5"
 ---
---- **xmake extension**
---- Get environment variable with default value
----@param name string
----@param default? string
----@return string|nil
----@overload fun():table
-function os.getenvs(name, default) end
-
----
---- **xmake extension**
---- Set environment variable
----@param name string
----@param value string
----@return boolean
-function os.setenv(name, value) end
-
----
---- **xmake extension**
---- Add one value to an environment variable like PATH
----@param name string
----@param value string
----@return boolean
-function os.addenv(name, value) end
-
----
---- **xmake extension**
---- Add multiple values to an environment variable like PATH
----@param name string
----@param values string|string[]
----@return boolean
-function os.addenvs(name, values) end
-
----
---- **xmake extension**
---- Set multiple environment variables
----@param envs table<string,string>
----@return boolean
-function os.setenvs(envs) end
-
----
---- **xmake extension**
---- Generate UUID
+---@scope script
 ---@return string
-function os.uuid() end
-
----
---- **xmake extension**
---- Generate UUID with specified format
----@param name string
----@return string
-function os.uuid4(name) end
----
---- **xmake extension**
---- Read value of a symbolic link
----@param path string
----@return string|nil
-function os.readlink(path) end
-
----
---- **xmake extension**
---- Check whether file system is case-sensitive at given path
----@param path string
----@return boolean
-function os.fscase(path) end
-
----
---- **xmake extension**
---- Create a symbolic link or hard link based on options
----@param src string
----@param dst string
----@param opt? table  options: {force:boolean, hard:boolean}
----@return boolean
-function os.ln(src, dst, opt) end
-
----
---- **xmake extension**
---- Get program/project directories and files.
----@return string
-function os.projectdir() end
----@return string
-function os.projectfile() end
-
-
-return os
+function os.xmakever(...) end

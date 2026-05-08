@@ -1,17 +1,87 @@
 ---@meta
--- Minimal xmake utils helpers for typing/completion.
+-- utils
 
+---@scope script
 ---@class utilslib
 utils = {}
 
---- Ternary-like helper: returns `a` if `cond` truthy else `b`.
----@generic T
----@param cond any
----@param a T
----@param b T
----@return T
-function utils.ifelse(cond, a, b) end
+---
+---TODO: document `utils.assert`.
+---@return any ... -- ToDo
+function utils.assert(...) end
 
---- Generate a random UUID string (e.g. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx).
----@return string
-function utils.uuid() end
+---
+---TODO: document `utils.bin2c`.
+---@return any ... -- ToDo
+function utils.bin2c(...) end
+
+---
+---TODO: document `utils.confirm`.
+---@return any ... -- ToDo
+function utils.confirm(...) end
+
+---
+---TODO: document `utils.cprint`.
+---@return any ... -- ToDo
+function utils.cprint(...) end
+
+---
+---TODO: document `utils.cprintf`.
+---@return any ... -- ToDo
+function utils.cprintf(...) end
+
+---
+---TODO: document `utils.dprint`.
+---@return any ... -- ToDo
+function utils.dprint(...) end
+
+---
+---TODO: document `utils.dprintf`.
+---@return any ... -- ToDo
+function utils.dprintf(...) end
+
+---
+---TODO: document `utils.dump`.
+---@return any ... -- ToDo
+function utils.dump(...) end
+
+---
+---TODO: document `utils.error`.
+---@return any ... -- ToDo
+function utils.error(...) end
+
+---
+---TODO: document `utils.print`.
+---@return any ... -- ToDo
+function utils.print(...) end
+
+---
+---TODO: document `utils.printf`.
+---@return any ... -- ToDo
+function utils.printf(...) end
+
+---
+---TODO: document `utils.trycall`.
+---@return any ... -- ToDo
+function utils.trycall(...) end
+
+---
+---TODO: document `utils.vprint`.
+---@return any ... -- ToDo
+function utils.vprint(...) end
+
+---
+---TODO: document `utils.vprintf`.
+---@return any ... -- ToDo
+function utils.vprintf(...) end
+
+---
+---TODO: document `utils.warning`.
+---@return any ... -- ToDo
+function utils.warning(...) end
+
+---
+---TODO: document `utils.wprint`.
+---@return any ... -- ToDo
+function utils.wprint(...) end
+

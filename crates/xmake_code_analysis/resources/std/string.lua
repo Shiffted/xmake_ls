@@ -1,24 +1,7 @@
 ---@meta
--- Copyright (c) 2018. tangzx(love.tangzx@qq.com)
---
--- Licensed under the Apache License, Version 2.0 (the "License"); you may not
--- use this file except in compliance with the License. You may obtain a copy of
--- the License at
---
--- http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
--- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
--- License for the specific language governing permissions and limitations under
--- the License.
+---[string](https://xmake.io/api/scripts/builtin-modules/string)
 
----
---- The type *string* represents immutable sequences of bytes. Lua is 8-bit
---- clean: strings can contain any 8-bit value, including embedded zeros
---- ('`\0`'). Lua is also encoding-agnostic; it makes no assumptions about
---- the contents of a string.
----@class (partial) string
+---@class string
 string = {}
 
 ---
@@ -28,6 +11,7 @@ string = {}
 --- `string.sub`.
 ---
 --- Note that numerical codes are not necessarily portable across platforms.
+---
 ---@param s string
 ---@param i? integer
 ---@param j? integer
@@ -40,9 +24,28 @@ function string.byte(s, i, j) end
 --- code equal to its corresponding argument.
 ---
 --- Note that numerical codes are not necessarily portable across platforms.
+---
 ---@param ... integer
 ---@return string
 function string.char(...) end
+
+---
+---TODO: document `string.convert`.
+---@return any ... -- ToDo
+function string.convert(...) end
+
+---
+---TODO: document `string.decode`.
+---@return any ... -- ToDo
+function string.decode(...) end
+
+---
+--- Deserialize a string to an object.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-deserialize)
+---@param str string String to deserialize
+---@return any ... -- ToDo
+function string.deserialize(str) end
 
 ---
 --- Returns a string containing a binary representation (*a binary chunk*) of
@@ -55,10 +58,25 @@ function string.char(...) end
 --- loaded, those upvalues receive fresh instances containing **nil**. (You can
 --- use the debug library to serialize and reload the upvalues of a function in
 --- a way adequate to your needs.)
+---
 ---@param func function
 ---@param strip? boolean
 ---@return string
 function string.dump(func, strip) end
+
+---
+---TODO: document `string.encode`.
+---@return any ... -- ToDo
+function string.encode(...) end
+
+---
+--- Determine if the end of the string matches.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-endswith)
+---@param str string String to check
+---@param suffix string Suffix string to match
+---@return any ... -- ToDo
+function string.endswith(str, suffix) end
 
 ---
 --- Looks for the first match of `pattern` in the string `s`. If it finds a
@@ -73,6 +91,7 @@ function string.dump(func, strip) end
 ---
 --- If the pattern has captures, then in a successful match the captured values
 --- are also returned, after the two indices.
+---
 ---@param s       string|number
 ---@param pattern string|number
 ---@param init?   integer
@@ -112,6 +131,7 @@ function string.find(s, pattern, init, plain) end
 --- converted to one following the same rules of `tostring`. If the option
 --- has any modifier (flags, width, length), the string argument should not
 --- contain embedded zeros.
+---
 ---@param fmt string
 ---@param ... any
 ---@return string
@@ -142,6 +162,7 @@ function string.format(fmt, ...) end
 ---
 --- For this function, a caret '`^`' at the start of a pattern does not work as
 --- an anchor, as this would prevent the iteration.
+---
 ---@param s string
 ---@param pattern string
 ---@return fun():string?...
@@ -190,6 +211,7 @@ function string.gmatch(s, pattern) end
 --- `local t = {name="lua", version="5.3"}`
 --- `x = string.gsub("$name-$version.tar.gz", "%$(%w+)", t)`
 --- > x="lua-5.3.tar.gz"
+---
 ---@param s       string|number
 ---@param pattern string|number
 ---@param repl string|number|table|fun(param:string)
@@ -199,19 +221,58 @@ function string.gmatch(s, pattern) end
 function string.gsub(s, pattern, repl, n) end
 
 ---
+--- Generate a case-insensitive matching pattern.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-ipattern)
+---@param pattern string Lua pattern string
+---@param brackets? boolean
+---@return any ... -- ToDo
+function string.ipattern(pattern, brackets?) end
+
+---
+--- Find the position of the last occurrence of a substring.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-lastof)
+---@param str string String to search
+---@param pattern string Pattern to match
+---@param plain? boolean
+---@return any ... -- ToDo
+function string.lastof(str, pattern, plain?) end
+
+---
 --- Receives a string and returns its length. The empty string `""` has
 --- length 0. Embedded zeros are counted, so `"a\000bc\000"` has length 5.
+---
 ---@param s string
 ---@return integer
 function string.len(s) end
 
 ---
+--- Compute the Levenshtein (edit) distance between two strings.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-levenshtein)
+---@param str1 string First string
+---@param str2 string Second string
+---@param opt? table
+---@return any ... -- ToDo
+function string.levenshtein(str1, str2, opt?) end
+
+---
 --- Receives a string and returns a copy of this string with all uppercase
 --- letters changed to lowercase. All other characters are left unchanged. The
 --- definition of what an uppercase letter is depends on the current locale.
+---
 ---@param s string
 ---@return string
 function string.lower(s) end
+
+---
+--- Remove the whitespace character to the left of the string.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-ltrim)
+---@param str string String to trim
+---@return any ... -- ToDo
+function string.ltrim(str) end
 
 ---
 --- Looks for the first *match* of `pattern` in the string `s`. If it
@@ -219,6 +280,7 @@ function string.lower(s) end
 --- it returns **nil**. If `pattern` specifies no captures, then the whole match
 --- is returned. A third, optional numerical argument `init` specifies where
 --- to start the search; its default value is 1 and can be negative.
+---
 ---@param s string
 ---@param pattern string
 ---@param init? integer
@@ -226,8 +288,10 @@ function string.lower(s) end
 function string.match(s, pattern, init) end
 
 ---@version >5.3
+---
 --- Returns a binary string containing the values `v1`, `v2`, etc. packed (that
 --- is, serialized in binary form) according to the format string `fmt`.
+---
 ---@param fmt string
 ---@param v1 string
 ---@param v2? string
@@ -236,9 +300,11 @@ function string.match(s, pattern, init) end
 function string.pack(fmt, v1, v2, ...) end
 
 ---@version >5.3
+---
 --- Returns the size of a string resulting from `string.pack` with the given
 --- format. The format string cannot have the variable-length options '`s`' or
 --- '`z`'
+---
 ---@param fmt string
 ---@return integer
 function string.packsize(fmt) end
@@ -251,6 +317,7 @@ function string.packsize(fmt) end
 ---
 --- Note that it is very easy to exhaust the memory of your machine with a
 --- single call to this function.
+---
 ---@param s string
 ---@param n integer
 ---@param sep? string
@@ -258,10 +325,58 @@ function string.packsize(fmt) end
 function string.rep(s, n, sep) end
 
 ---
+--- Replace text in a string.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-replace)
+---@param str string String to process
+---@param old string Old string to replace
+---@param new string New replacement string
+---@param opt? table
+---@return any ... -- ToDo
+function string.replace(str, old, new, opt?) end
+
+---
 --- Returns a string that is the string `s` reversed.
+---
 ---@param s string
 ---@return string
 function string.reverse(s) end
+
+---
+--- Remove the whitespace character to the right of the string.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-rtrim)
+---@param str string String to trim
+---@return any ... -- ToDo
+function string.rtrim(str) end
+
+---
+--- Serialize an object to a string.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-serialize)
+---@param object any Object to serialize
+---@param opt? table
+---@return any ... -- ToDo
+function string.serialize(object, opt?) end
+
+---
+--- Split string by separator.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-split)
+---@param str string String to split
+---@param separator string Separator string
+---@param options table Split options table (optional)
+---@return any ... -- ToDo
+function string.split(str, separator, options) end
+
+---
+--- Determine if the beginning of the string matches.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-startswith)
+---@param str string String to check
+---@param prefix string Prefix string to match
+---@return any ... -- ToDo
+function string.startswith(str, prefix) end
 
 ---
 --- Returns the substring of `s` that starts at `i` and continues until
@@ -275,6 +390,7 @@ function string.reverse(s) end
 --- corrected to 1. If `j` is greater than the string length, it is corrected to
 --- that length. If, after these corrections, `i` is greater than `j`, the
 --- function returns the empty string.
+---
 ---@param s  string|number
 ---@param i  integer
 ---@param j? integer
@@ -282,11 +398,26 @@ function string.reverse(s) end
 ---@nodiscard
 function string.sub(s, i, j) end
 
+---
+--- Remove the left and right whitespace characters of the string.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-trim)
+---@param str string String to trim
+---@return any ... -- ToDo
+function string.trim(str) end
+
+---
+---TODO: document `string.tryformat`.
+---@return any ... -- ToDo
+function string.tryformat(...) end
+
 ---@version >5.3
+---
 --- Returns the values packed in string `s` according to the format string
 --- `fmt`. An optional `pos` marks where to start reading in `s` (default is 1).
 --- After the read values, this function also returns the index of the first
 --- unread byte in `s`.
+---
 ---@param fmt string
 ---@param s string
 ---@param pos? integer
@@ -298,64 +429,25 @@ function string.unpack(fmt, s, pos) end
 --- Receives a string and returns a copy of this string with all lowercase
 --- letters changed to uppercase. All other characters are left unchanged. The
 --- definition of what a lowercase letter is depends on the current locale.
+---
 ---@param s string
 ---@return string
 function string.upper(s) end
 
--------------------------------------------------------------------------------
--- Xmake extensions (string)
--------------------------------------------------------------------------------
+---
+---TODO: document `string.vformat`.
+---@return any ... -- ToDo
+function string.vformat(...) end
 
---- Trim leading and trailing whitespaces.
----@param s string
----@return string
-function string.trim(s) end
+---
+---TODO: document `string.wcswidth`.
+---@return any ... -- ToDo
+function string.wcswidth(...) end
 
---- Split string by separator. When `sep` is nil, split by whitespaces.
---- Option fields may include: plain (boolean), strict (boolean).
----@param s string
----@param sep? string
----@param opt? table
----@return string[]
-function string.split(s, sep, opt) end
-
---- Check if string starts with the given prefix.
----@param s string
----@param prefix string
----@param plain? boolean
----@return boolean
-function string.startswith(s, prefix, plain) end
-
---- Check if string ends with the given suffix.
----@param s string
----@param suffix string
----@param plain? boolean
----@return boolean
-function string.endswith(s, suffix, plain) end
-
---- Find last index of any character in `chars` set.
----@param s string
----@param chars string
----@return integer|nil index
-function string.lastof(s, chars) end
-
---- Convert string encoding, e.g. from "utf16le" to "utf8".
----@param s string
----@param from string
----@param to string
----@return string
-function string.convert(s, from, to) end
-
---- Serialize Lua object to string.
----@param object any
----@param opt? table
----@return string|nil
----@return string? err
-function string.serialize(object, opt) end
-
---- Deserialize Lua object from string.
----@param s string
----@param opt? table
----@return any
----@return string? err
-function string.deserialize(s, opt) end
+---
+---TODO: document `string.wcwidth`.
+---@return any ... -- ToDo
+function string.wcwidth(...) end
+width`.
+---@return any ... -- ToDo
+function string.wcwidth(...) end

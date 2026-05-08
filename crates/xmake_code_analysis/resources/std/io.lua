@@ -1,489 +1,211 @@
 ---@meta
--- Copyright (c) 2018. tangzx(love.tangzx@qq.com)
---
--- Licensed under the Apache License, Version 2.0 (the "License"); you may not
--- use this file except in compliance with the License. You may obtain a copy of
--- the License at
---
--- http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
--- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
--- License for the specific language governing permissions and limitations under
--- the License.
+---[io](https://xmake.io/api/scripts/builtin-modules/io)
 
+---@scope script
 ---@class iolib
 io = {}
 
 ---
---- Equivalent to `file:close()`. Without a file, closes the default output
---- file.
----@param file? file
-function io.close(file) end
-
----
---- Equivalent to `io.output():flush()`.
-function io.flush() end
-
----
---- When called with a file name, it opens the named file (in text mode), and
---- sets its handle as the default input file. When called with a file handle,
---- it simply sets this file handle as the default input file. When called
---- without parameters, it returns the current default input file.
----
---- In case of errors this function raises the error, instead of returning an
---- error code.
----@param file? file | string
----@return file
-function io.input(file) end
-
----
---- Opens the given file name in read mode and returns an iterator function
---- works like `file:lines(···)` over the opened file. When the iterator
---- function detects the end of file, it returns no values (to finish the loop)
---- and automatically closes the file.
----
---- The call `io.lines()` (with no file name) is equivalent to `io.input():lines
---- ()`; that is, it iterates over the lines of the default
---- input file. In this case, the iterator does not close the file when the loop
---- ends.
----
---- In case of errors this function raises the error, instead of returning an
---- error code.
----@param filename? string
----@return fun():any
-function io.lines(filename, ...) end
-
----@alias iolib.OpenMode "r" | "w" | "a" | "r+" | "w+" | "a+" | "rb" | "wb" | "ab" | "rb+" | "wb+" | "ab+" | "r+b" | "w+b" | "a+b"
----
---- This function opens a file, in the mode specified in the string `mode`.  In
---- case of success, it returns a new file handle. The `mode` string can be
---- any of the following:
----
---- **"r"**: read mode (the default);
---- **"w"**: write mode;
---- **"a"**: append mode;
---- **"r+"**: update mode, all previous data is preserved;
---- **"w+"**: update mode, all previous data is erased;
---- **"a+"**: append update mode, previous data is preserved, writing is only
---- allowed at the end of file.
----
---- The `mode` string can also have a '`b`' at the end, which is needed in
---- some systems to open the file in binary mode.
----@param filename string
----@param mode? iolib.OpenMode
----@overload fun(filename: string, mode?: iolib.OpenMode, opt?: table): file?, string?
----@return file?
----@return string? err
-function io.open(filename, mode) end
-
----
---- Similar to `io.input`, but operates over the default output file.
----@param file? file | string
----@return file
-function io.output(file) end
-
----
---- This function is system dependent and is not available on all platforms.
----
---- Starts program `prog` in a separated process and returns a file handle that
---- you can use to read data from this program (if `mode` is "`r`", the default)
---- or to write data to this program (if `mode` is "`w`").
----@param prog string
----@param mode? string | 'r' | 'w'
----@return file
-function io.popen(prog, mode) end
-
----@alias std.readmode
----| integer
----| string
----| "n"   # Reads a number, returning a float or integer based on Lua's conversion grammar.
----| "a"   # Reads the entire file starting from the current position.
----| "l"   # Reads a line and ignores the end-of-line marker.
----| "L"   # Reads a line and preserves the end-of-line marker.
----| "*n"  # Reads a number, returning a float or integer based on Lua's conversion grammar.
----| "*a"  # Reads the entire file starting from the current position.
----| "*l"  # Reads a line and ignores the end-of-line marker.
----| "*L"  # Reads a line and preserves the end-of-line marker.
-
----
---- Equivalent to `io.input():read(···)`.
----@param ... std.readmode
----@return any
----@return any ...
----@nodiscard
-function io.read(...) end
-
----
---- In case of success, returns a handle for a temporary file. This file is
---- opened in update mode and it is automatically removed when the program ends.
---- @return file
-function io.tmpfile() end
-
----
---- Checks whether `obj` is a valid file handle. Returns the string "`file`"
---- if `obj` is an open file handle, "`closed file`" if `obj` is a closed file
---- handle, or **nil** if `obj` is not a file handle.
----@param obj file
----@return 'file' | 'closed file' | nil
-function io.type(obj) end
-
----
---- Equivalent to `io.output():write(···)`.
---- @param ... string | number
---- @return file?
---- @return string? err
-function io.write(...) end
-
---- File object
----@class file
-local file = {}
-
---- @version > 5.2
----
---- Closes `file`. Note that files are automatically closed when their
---- handles are garbage collected, but that takes an unpredictable amount of
---- time to happen.
----
---- When closing a file handle created with `io.popen`, `file:close` returns the
---- same values returned by `os.execute`.
---- @return true|nil
---- @return 'exit'|'signal'
---- @return integer
-function file:close() end
-
---- @version 5.1, JIT
----
---- Closes `file`. Note that files are automatically closed when their
---- handles are garbage collected, but that takes an unpredictable amount of
---- time to happen.
---- @return true|nil
---- @return string? err
-function file:close() end
-
----
---- Saves any written data to `file`.
---- @return true|nil
---- @return string? err
-function file:flush() end
-
----
---- Returns an iterator function that, each time it is called, reads the file
---- according to the given formats. When no format is given, uses "l" as a
---- default. As an example, the construction
---- `for c in file:lines(1) do *body* end`
---- will iterate over all characters of the file, starting at the current
---- position. Unlike `io.lines`, this function does not close the file when the
---- loop ends.
----
---- In case of errors this function raises the error, instead of returning an
---- error code.
----@return fun():string | integer | nil
-function file:lines(...) end
-
--- TODO: file:read() can accept vararg params and return varargs
-
----
---- Reads the file `file`, according to the given formats, which specify
---- what to read. For each format, the function returns a string or a number
---- with the characters read, or **nil** if it cannot read data with the
---- specified format. (In this latter case, the function does not read
---- subsequent formats.) When called without parameters, it uses a default
---- format that reads the next line (see below).
-----
---- The available formats are:
---- **"n"**: reads a numeral and returns it as a float or an integer, following
---- the lexical conventions of Lua. (The numeral may have leading spaces and a
---- sign.) This format always reads the longest input sequence that is a valid
---- prefix for a numeral; if that prefix does not form a valid numeral (e.g., an
---- empty string, "`0x`", or "`3.4e-`"), it is discarded and the format returns
---- **nil**;
---- **"a"**: reads the whole file, starting at the current position. On end of
---- file, it returns the empty string;
---- **"l"**: reads the next line skipping the end of line, returning **nil** on
---- end of file. This is the default format.
---- **"L"**: reads the next line keeping the end-of-line character (if present),
---- returning **nil** on end of file;
---- *number*: reads a string with up to this number of bytes, returning **nil**
---- on end of file. If `number` is zero, it reads nothing and returns an
---- empty string, or **nil** on end of file.
----@param ... std.readmode
----@return any
----@return any ...
----@nodiscard
-function file:read(...) end
-
----
---- Sets and gets the file position, measured from the beginning of the
---- file, to the position given by `offset` plus a base specified by the string
---- `whence`, as follows:
---- **"set"**: base is position 0 (beginning of the file);
---- **"cur"**: base is current position;
---- **"end"**: base is end of file;
----
---- In case of success, `seek` returns the final file position, measured in
---- bytes from the beginning of the file. If `seek` fails, it returns **nil**,
---- plus a string describing the error.
----
---- The default value for `whence` is "`cur`", and for `offset` is 0. Therefore,
---- the call `file:seek()` returns the current file position, without changing
---- it; the call `file:seek("set")` sets the position to the beginning of the
---- file (and returns 0); and the call `file:seek("end")` sets the position
---- to the end of the file, and returns its size.
----@overload fun()
----@param whence string | 'set' | 'cur' | 'end'
----@param offset integer
----@return integer? pos
----@return string? err
-function file:seek(whence, offset) end
-
----
---- Sets the buffering mode for an output file. There are three available
---- modes:
---- **"no"**: no buffering; the result of any output operation appears
---- immediately.
---- **"full"**: full buffering; output operation is performed only when the
---- buffer is full (or when you explicitly `flush` the file (see `io.flush`)).
---- **"line"**: line buffering; output is buffered until a newline is output or
---- there is any input from some special files (such as a terminal device).
----
---- For the last two cases, `size` specifies the size of the buffer, in
---- bytes. The default is an appropriate size.
----@param mode string | 'no' | 'full' | 'line'
----@param size? integer
-function file:setvbuf(mode, size) end
-
----
---- Writes the value of each of its arguments to the `file`. The arguments
---- must be strings or numbers.
----
---- In case of success, this function returns `file`. Otherwise it returns
---- **nil** plus a string describing the error.
---- @param ... string | number
---- @return file?
---- @return string? err
-function file:write(...) end
-
 --- * `io.stderr`: Standard error.
 ---@type file
 io.stderr = nil
 
+---
 --- * `io.stdin`: Standard in.
 ---@type file
 io.stdin = nil
 
+---
 --- * `io.stdout`: Standard out.
 ---@type file
 io.stdout = nil
 
--------------------------------------------------------------------------------
--- Xmake extensions (io)
--- These APIs extend the standard Lua io library and are provided by Xmake.
--------------------------------------------------------------------------------
+---
+--- read and display all contents of the file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-cat)
+---@param filename string File path string
+---@return any ... -- ToDo
+function io.cat(filename) end
 
---- Get a std stream as a file by pseudo path.
---- Paths: `/dev/stdin`, `/dev/stdout`, `/dev/stderr`.
----@param path string
----@return file? f
----@return string? err
-function io.stdfile(path) end
-
---- Open a file lock object for the given path.
---- The lock file will be created if not exists.
----@param path string
----@return filelock? lock
----@return string? err
-function io.openlock(path) end
-
---- Read all data from a file with optional options (e.g. encoding).
----@param filepath string
+---
+--- Convert file encoding.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-convert)
+---@param inputfile string Input file path
+---@param outputfile string Output file path
 ---@param opt? table
----@return string|nil data
----@return string? err
-function io.readfile(filepath, opt) end
+---@return any ... -- ToDo
+function io.convert(inputfile, outputfile, opt?) end
 
---- Write all data to a file with optional options (e.g. encoding).
----@param filepath string
----@param data string
----@param opt? table
----@return boolean ok
----@return string? err
-function io.writefile(filepath, data, opt) end
+---
+--- Flush standard output buffer.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-flush)
+---@return any ... -- ToDo
+function io.flush() end
 
---- Save a Lua object to file (serialized text).
---- Only writes when changed if `opt.only_changed` is true.
----@param filepath string
----@param object any
----@param opt? table
----@return boolean ok
----@return string? err
-function io.save(filepath, object, opt) end
+---
+--- Full text replaces the contents of the specified path file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-gsub)
+---@param filename string File path string
+---@param pattern string Pattern string
+---@param replacement string Replacement string
+---@param options? table
+---@return any ... -- ToDo
+function io.gsub(filename, pattern, replacement, options?) end
 
---- Load a Lua object from file (deserialize text content).
----@param filepath string
----@param opt? table
----@return any result
----@return string? err
-function io.load(filepath, opt) end
+---
+--- Insert text before a line number in a file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-insert)
+---@param filepath string File path string
+---@param lineidx number Line number to insert before
+---@param text string Text content to insert
+---@param options? table
+---@return any ... -- ToDo
+function io.insert(filepath, lineidx, text, options?) end
 
---- Iterate file lines, with options. When `opt.close_on_finished` is true,
---- the file will be closed when iteration ends.
----@overload fun(filename?: string): fun():any
----@param filename string
----@param opt? table
----@return fun():string|nil
-function io.lines(filename, opt) end
-
---- Replace text in file with Lua string.gsub semantics.
---- Returns the new content and replacement count.
----@param filepath string
----@param pattern string|table
----@param replace string|function
----@param opt? table
----@return string|nil data
----@return integer count
----@return string? err
-function io.gsub(filepath, pattern, replace, opt) end
-
---- Replace text in file using pattern/replace with extra options.
---- Similar to `io.gsub` but supports additional flags (e.g. plain, etc.).
----@param filepath string
----@param pattern string
----@param replace string|function
----@param opt? table
----@return string|nil data
----@return integer count
----@return string? err
-function io.replace(filepath, pattern, replace, opt) end
-
---- Insert text before a specific line number and return new content.
---- Line index starts from 1.
----@param filepath string
----@param lineidx integer
----@param text string
----@param opt? table
----@return string|nil data
----@return string? err
-function io.insert(filepath, lineidx, text, opt) end
-
---- Print file content to stdout. If linecount is set, stop after N lines.
----@param filepath string
----@param linecount? integer
----@param opt? table
-function io.cat(filepath, linecount, opt) end
-
---- Tail file content to stdout. If linecount < 0, print whole file.
----@param filepath string
----@param linecount? integer
----@param opt? table
-function io.tail(filepath, linecount, opt) end
-
---- Check whether the given file (default stdout) is a TTY.
+---
+--- Check if a file is a terminal device.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-isatty)
 ---@param file? file
----@return boolean|nil ok
-function io.isatty(file) end
+---@return any ... -- ToDo
+function io.isatty(file?) end
 
---- Read from stdin with options.
----@param fmt std.readmode|string
----@param opt? table
----@return any
----@return any ...
-function io.read(fmt, opt) end
+---
+--- Read all lines from file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-lines)
+---@param filename string File path string
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function io.lines(filename, options) end
 
---- True if stdin has readable data.
----@return boolean
+---
+--- Load all table contents from the specified path file deserialization.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-load)
+---@param filename string File path string
+---@return any ... -- ToDo
+function io.load(filename) end
+
+---
+--- Open file for reading and writing.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-open)
+---@param filename string File path string
+---@param mode string Open mode string
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function io.open(filename, mode, options) end
+
+---
+--- Open a lock of a file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-openlock)
+---@param filename string File path string
+---@return any ... -- ToDo
+function io.openlock(filename) end
+
+---
+--- Formatted output content to file with newline.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-print)
+---@param filename string File path string
+---@param formatstring string Format string
+---@param ... any Variable arguments for formatting
+---@return any ... -- ToDo
+function io.print(filename, formatstring, ...) end
+
+---
+--- Formatted output to file without line breaks.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-printf)
+---@param filename string File path string
+---@param formatstring string Format string
+---@param ... any Variable arguments for formatting
+---@return any ... -- ToDo
+function io.printf(filename, formatstring, ...) end
+
+---
+--- Read data from standard input.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-read)
+---@param fmt? string
+---@return any ... -- ToDo
+function io.read(fmt?) end
+
+---
+--- Check if standard input is readable.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-readable)
+---@return any ... -- ToDo
 function io.readable() end
 
---- Print formatted text to stdout and append newline.
----@param ... any
-function io.print(...) end
+---
+--- Read everything from the specified path file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-readfile)
+---@param filename string File path string
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function io.readfile(filename, options) end
 
---- Print formatted text to stdout without newline.
----@param ... any
-function io.printf(...) end
+---
+--- Replace text of the given file and return the replaced data.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-replace)
+---@param filename string File path string
+---@param pattern string Pattern string
+---@param replacement string Replacement string
+---@param options table Options table (optional)
+---@return any ... -- ToDo
+function io.replace(filename, pattern, replacement, options) end
 
--------------------------------------------------------------------------------
--- Xmake extensions (file methods)
--------------------------------------------------------------------------------
+---
+--- Serialize all table contents to the specified path file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-save)
+---@param filename string File path string
+---@param data table Table data to serialize
+---@return any ... -- ToDo
+function io.save(filename, data) end
 
---- Get file size in bytes.
----@return integer|nil size
----@return string? err
-function file:size() end
+---
+--- Get a std file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-stdfile)
+---@param stdname string Standard file name string
+---@return any ... -- ToDo
+function io.stdfile(stdname) end
 
---- Return whether file is readable (nonblocking check on pipes/streams).
----@return boolean ok
----@return string? err
-function file:readable() end
+---
+--- Read and display the tail content of the file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-tail)
+---@param filename string File path string
+---@param lines number Number of lines to read
+---@return any ... -- ToDo
+function io.tail(filename, lines) end
 
---- Check if file is attached to a TTY.
----@return boolean|nil ok
----@return string? err
-function file:isatty() end
+---
+--- Write data to standard output.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-write)
+---@param ... any Content to write
+---@return any ... -- ToDo
+function io.write(...) end
 
---- Get underlying raw file descriptor/handle.
---- Windows returns HANDLE casted to integer.
----@return integer|nil fd
----@return string? err
-function file:rawfd() end
-
---- Write a formatted line (adds trailing newline).
----@param ... any
-function file:print(...) end
-
---- Write a formatted string (no trailing newline).
----@param ... any
-function file:printf(...) end
-
---- Serialize and save a Lua object to this file.
----@param object any
----@param opt? table
----@return boolean ok
----@return string? err
-function file:save(object, opt) end
-
---- Read and deserialize a Lua object from this file.
----@return any result
----@return string? err
-function file:load() end
-
--------------------------------------------------------------------------------
--- Xmake filelock
--------------------------------------------------------------------------------
-
---- File lock object used to synchronize access across processes.
----@class filelock
-local filelock = {}
-
---- Try to acquire a lock. When `opt.shared` is true, take a shared lock.
---- Re-entrant: multiple lock() calls must be matched by unlock().
----@param opt? table
----@return boolean ok
----@return string? err
-function filelock:lock(opt) end
-
---- Try to acquire a lock without blocking.
----@param opt? table
----@return boolean ok
----@return string? err
-function filelock:trylock(opt) end
-
---- Release one level of lock. Fully unlocks when the counter reaches zero.
----@return boolean ok
----@return string? err
-function filelock:unlock() end
-
---- Close the lock handle.
----@return boolean ok
----@return string? err
-function filelock:close() end
-
---- True if currently locked by this process.
----@return boolean
-function filelock:islocked() end
-
---- Absolute path of the lock file.
----@return string
-function filelock:path() end
+---
+--- Write all content to the specified path file.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-writefile)
+---@param filename string File path string
+---@param data string Data string to write
+---@param options? table
+---@return any ... -- ToDo
+function io.writefile(filename, data, options?) end
 

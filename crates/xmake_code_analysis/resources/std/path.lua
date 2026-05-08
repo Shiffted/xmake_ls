@@ -1,239 +1,181 @@
 ---@meta
--- Copyright (c) 2018. tangzx(love.tangzx@qq.com)
---
--- Licensed under the Apache License, Version 2.0 (the "License"); you may not
--- use this file except in compliance with the License. You may obtain a copy of
--- the License at
---
--- http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
--- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
--- License for the specific language governing permissions and limitations under
---- Options for `path.translate`/`pathobj:translate`.
----@class path_translate_opt
----@field normalize? boolean  @Also normalize while translating
----@field separator? string   @Target separator, e.g. "/" or "\\"
+---[path](https://xmake.io/api/scripts/builtin-modules/path)
 
--- the License.
-
----
---- Path utilities provided by xmake. Cross-platform helpers for
---- joining, normalizing, translating paths and handling PATH-like
---- environment variables.
----@param p string
----@return string
---- Reference: xmake/core/base/path.lua
 ---@class pathlib
----@overload fun(p:string, transform?:fun(p:string):string): pathobj
----@param p string
----@param opt? path_translate_opt
----@return string
 path = {}
 
----@class pathobj
----@param p string
----@param sep? string
----@return string
-local pathobj = {}
+---
+--- Convert to absolute path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-absolute)
+---@param path string Path string to convert
+---@param rootdir string Root directory for absolute conversion
+---@return any ... -- ToDo
+function path.absolute(path, rootdir) end
 
---====================
----@param p string
----@param rootdir? string
----@return string
--- Module functions (path.*)
---====================
+---
+--- Get the file name with no suffix at the end of the path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-basename)
+---@param path string Path string
+---@return any ... -- ToDo
+function path.basename(path) end
 
----@param p string
----@param rootdir? string
----@return string
---- Normalize a path: collapse './', '..', duplicate separators
---- and format separators for the current platform.
-function path.normalize(p) end
----@param p string
----@return boolean
+---
+--- Convert path to Cygwin style.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-cygwin)
+---@param path string Path string
+---@return any ... -- ToDo
+function path.cygwin(path) end
 
---- Translate a path. If `opt.normalize` is true, it will also normalize.
-function path.translate(p, opt) end
----@param p string
----@return string
+---
+---TODO: document `path.cygwin_path`.
+---@return any ... -- ToDo
+function path.cygwin_path(...) end
 
---- Get the directory part of a path.
-function path.directory(p, sep) end
----@param p string
----@return string
+---
+--- Get the directory name of the path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-directory)
+---@param path string Path string
+---@return any ... -- ToDo
+function path.directory(path) end
 
---- Get absolute path (relative to `rootdir`).
-function path.absolute(p, rootdir) end
----@param p string
----@return string
-
---- Get relative path (relative to `rootdir`).
-function path.relative(p, rootdir) end
----@param p string
----@param sep? string
----@return string
-
---- Check whether path is absolute.
-function path.is_absolute(p) end
----@param p string
----@return string
-
---- Convert to unix-style separators (especially on Windows).
-function path.unix(p) end
-
----@param p string
----@param level? integer
----@return string|nil
---- Convert to Cygwin style path (e.g. `C:\` -> `/c/`).
-function path.cygwin(p) end
-
----@param p string
----@param ... string
----@return string
---- Convert to Msys/Cygwin usable path (e.g. "c:\\xx" -> "/c/xx").
-function path.cygwin_path(p) end
-
----@param p string
----@return string[]
---- Get filename without directory.
-function path.filename(p, sep) end
-
----@return string
---- Get basename without extension.
-function path.basename(p) end
-
----@return string
---- Get extension (with dot). When `level>1`, return multi-level
---- combined extensions.
-function path.extension(p, level) end
----@param env_path string
----@return string[]
-
---- Join path segments with proper separators and translation.
-function path.join(p, ...) end
----@param paths string[]
----@param envsep? string
----@return string
-
---- Split path by separators.
-function path.split(p) end
----@param p string
----@return boolean
-
---- Get the platform path separator ('/' or '\\\\').
-function path.sep() end
----@param pattern string
----@return string
-
---- Get the environment PATH separator (':' or ';').
+---
+--- Get the environment variable path separator of the current platform.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-envsep)
+---@return any ... -- ToDo
 function path.envsep() end
----@param p string
----@param transform? fun(p:string):string
----@return pathobj
 
---- Split a PATH-like environment variable. Handles quotes/flags safely.
-function path.splitenv(env_path) end
----@param p any
----@return boolean
+---
+--- Get the suffix of the path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-extension)
+---@param path string Path string
+---@param level? number
+---@return any ... -- ToDo
+function path.extension(path, level?) end
 
---- Join a list into a PATH-like environment variable safely.
-function path.joinenv(paths, envsep) end
+---
+--- Get the file name with the last suffix of the path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-filename)
+---@param path string Path string
+---@return any ... -- ToDo
+function path.filename(path) end
 
----@return string
---- Check if the last character is a separator.
-function path.islastsep(p) end
-
----@return string
---- Convert a glob pattern to a Lua pattern (supports '*' and '**').
-function path.pattern(pattern) end
-
----@param p string
----@return nil
---- Create a new path instance (same as calling `path(p, transform)`).
-function path.new(p, transform) end
-
----@return boolean
---- Check whether a value is a path instance.
+---
+--- Check if a value is a path instance.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-instance_of)
+---@param p any The value to check
+---@return any ... -- ToDo
 function path.instance_of(p) end
 
----@param transform fun(p:string):string
----@return nil
+---
+--- Determine if it is an absolute path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-is_absolute)
+---@param path string Path string to check
+---@return any ... -- ToDo
+function path.is_absolute(path) end
 
---- Get the display string (after applying transform).
-function pathobj:str() end
----@return fun(p:string):string|nil
+---
+--- Get if the last character is a separator.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-islastsep)
+---@param path string Path string to check
+---@return any ... -- ToDo
+function path.islastsep(path) end
 
---- Get the raw string.
-function pathobj:rawstr() end
----@return pathobj
+---
+--- Stitching path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-join)
+---@param paths string|string[] Path string or array
+---@param ... any Variable arguments, can pass multiple path strings
+---@return any ... -- ToDo
+function path.join(paths, ...) end
 
---- Set the raw string.
-function pathobj:set(p) end
----@return pathobj
+---
+--- Join path array into an environment variable string.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-joinenv)
+---@param paths string[] Array of path strings
+---@return any ... -- ToDo
+function path.joinenv(paths) end
 
---- Check whether empty.
-function pathobj:empty() end
----@param opt? path_translate_opt
----@return pathobj
+---
+--- Create a new path instance.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-new)
+---@param p string Required. Path string
+---@param transform? function
+---@return any ... -- ToDo
+function path.new(p, transform?) end
 
---- Set the transform function.
-function pathobj:transform_set(transform) end
----@return pathobj
+---
+--- Normalize the path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-normalize)
+---@param p string Required. Path string
+---@return any ... -- ToDo
+function path.normalize(p) end
 
---- Get the transform function.
-function pathobj:transform_get() end
----@return string
+---
+--- Convert path pattern to lua pattern.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-pattern)
+---@param path string Path string to convert
+---@return any ... -- ToDo
+function path.pattern(path) end
 
---- Clone this instance.
-function pathobj:clone() end
----@return string
+---
+--- Convert to relative path.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-relative)
+---@param path string Path string to convert
+---@param rootdir string Root directory for relative conversion
+---@return any ... -- ToDo
+function path.relative(path, rootdir) end
 
---- Normalize (return a new instance).
-function pathobj:normalize() end
----@param level? integer
----@return string|nil
+---
+--- Get the path separator of the current platform.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-sep)
+---@return any ... -- ToDo
+function path.sep() end
 
---- Translate (return a new instance).
-function pathobj:translate(opt) end
----@return pathobj
+---
+--- Split the path by the separator.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-split)
+---@param path string Path string to split
+---@return any ... -- ToDo
+function path.split(path) end
 
---- Convert to unix style (return a new instance).
-function pathobj:unix() end
----@param rootdir? string
----@return pathobj
+---
+--- Split an environment variable value into an array of paths.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-splitenv)
+---@param envpath string Environment variable path string
+---@return any ... -- ToDo
+function path.splitenv(envpath) end
 
---- Filename.
-function pathobj:filename() end
----@param rootdir? string
----@return pathobj
+---
+--- Convert path to the path style of the current platform.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-translate)
+---@param path string Path string to convert
+---@return any ... -- ToDo
+function path.translate(path) end
 
---- Basename.
-function pathobj:basename() end
----@param ... string
----@return pathobj
-
---- Extension.
-function pathobj:extension(level) end
----@return string[]
-
---- Directory (return a new instance).
-function pathobj:directory() end
----@return string[]
-
---- Absolute path (return a new instance).
-function pathobj:absolute(rootdir) end
-
---- Relative path (return a new instance).
-function pathobj:relative(rootdir) end
-
---- Join subpaths (return a new instance).
-function pathobj:join(...) end
-
---- Split by separators.
-function pathobj:split() end
-
---- Split PATH-like environment variable.
-function pathobj:splitenv() end
-
+---
+--- Convert path to Unix style.
+---
+---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-unix)
+---@param path string Path string
+---@return any ... -- ToDo
+function path.unix(path) end
