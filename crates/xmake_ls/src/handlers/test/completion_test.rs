@@ -1472,4 +1472,56 @@ function my_script_only_fn() end
         ));
         Ok(())
     }
+
+    #[gtest]
+    fn test_user_scope_script_visible_in_user_function() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope script
+function my_script_only_fn() end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                ---@scope script
+                function my_helper()
+                    my_scrip<??>
+                end
+            "#,
+            vec![VirtualCompletionItem {
+                label: "my_script_only_fn".to_string(),
+                kind: CompletionItemKind::FUNCTION,
+                label_detail: Some("()".to_string()),
+            },],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_user_scope_description_overrides_callback_context() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope script
+function my_script_only_fn() end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                on_load(function ()
+                    ---@scope description
+                    local inner = function ()
+                        my_scrip<??>
+                    end
+                end)
+            "#,
+            vec![],
+        ));
+        Ok(())
+    }
 }

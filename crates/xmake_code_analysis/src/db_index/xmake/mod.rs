@@ -3,10 +3,16 @@ mod xmake_function;
 
 use std::collections::{HashMap, HashSet};
 
-use emmylua_parser::{LuaAstNode, LuaCallExpr, LuaClosureExpr};
+use emmylua_parser::{
+    LuaAssignStat, LuaAstNode, LuaCallExpr, LuaClosureExpr, LuaLocalName, LuaLocalStat,
+    LuaTableField, LuaVarExpr,
+};
 use rowan::TextSize;
 
-use crate::{DbIndex, FileId, LuaIndex};
+use crate::{
+    DbIndex, FileId, LuaDeclId, LuaIndex, LuaMemberId, LuaSemanticDeclId, LuaSignatureId,
+    XmakeScope,
+};
 pub use target::*;
 pub use xmake_function::*;
 
@@ -65,12 +71,14 @@ impl LuaXmakeIndex {
 
 /// Whether `position` in `file_id` is inside an xmake script-scope context.
 ///
-/// Two ways to qualify:
+/// Three ways to qualify:
 /// 1. The whole file is registered as script-scope (e.g. it was named in
 ///    `on_run("foo")` or it lives under a directory passed to
 ///    `add_moduledirs(...)`).
 /// 2. The position is inside a callback that is the argument to an
 ///    xmake `on_*`/`before_*`/`after_*` callback registration.
+/// 3. The position is inside a closure whose user-defined `@scope` tag
+///    classifies it as `script`.
 pub fn is_script_scope_position(db: &DbIndex, file_id: FileId, position: TextSize) -> bool {
     if db.get_xmake_index().is_script_scope_file(file_id) {
         return true;
@@ -91,6 +99,11 @@ pub fn is_script_scope_position(db: &DbIndex, file_id: FileId, position: TextSiz
     };
     for ancestor in parent.ancestors() {
         if let Some(closure) = LuaClosureExpr::cast(ancestor) {
+            match closure_user_scope(db, file_id, &closure) {
+                Some(XmakeScope::Script) => return true,
+                Some(XmakeScope::Description) => return false,
+                _ => {}
+            }
             if is_callback_arg_closure(&closure) {
                 return true;
             }
