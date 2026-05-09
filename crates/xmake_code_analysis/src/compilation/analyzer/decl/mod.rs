@@ -254,6 +254,10 @@ impl<'a> DeclAnalyzer<'a> {
             .get_xmake_index_mut()
             .add_includes(file_id, include_file_id);
     }
+
+    pub fn defer_load(&mut self, path: std::path::PathBuf) {
+        self.context.defer_load(path);
+    }
 }
 
 fn is_method_func_stat(stat: &LuaFuncStat) -> Option<bool> {

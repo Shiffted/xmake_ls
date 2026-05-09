@@ -64,16 +64,43 @@ pub fn analyze_xmake_callback_call(
 
     let module_path = string_token.get_value();
     let source_file_id = analyzer.get_file_id();
-    let module_info = analyzer.db.get_module_index().find_import(
-        &analyzer.db,
-        &module_path,
-        source_file_id,
-    )?;
-    let target_file_id = module_info.file_id;
-    analyzer
-        .db
-        .get_xmake_index_mut()
-        .add_script_scope_file(source_file_id, target_file_id);
+
+    let target_path_on_disk =
+        analyzer
+            .db
+            .get_vfs()
+            .get_file_path(&source_file_id)
+            .and_then(|source_path| {
+                source_path
+                    .parent()
+                    .map(|parent| parent.join(format!("{}.lua", module_path.replace('.', "/"))))
+            });
+    if let Some(target_path) = &target_path_on_disk {
+        analyzer
+            .db
+            .get_xmake_index_mut()
+            .add_referenced_path(source_file_id, target_path.clone());
+    }
+
+    let module_info =
+        analyzer
+            .db
+            .get_module_index()
+            .find_import(&analyzer.db, &module_path, source_file_id);
+    if let Some(module_info) = module_info {
+        let target_file_id = module_info.file_id;
+        analyzer
+            .db
+            .get_xmake_index_mut()
+            .add_script_scope_file(source_file_id, target_file_id);
+        return Some(());
+    }
+
+    if let Some(target_path) = target_path_on_disk {
+        if target_path.is_file() {
+            analyzer.defer_load(target_path);
+        }
+    }
 
     Some(())
 }
@@ -162,12 +189,46 @@ fn analyze_includes(analyzer: &mut DeclAnalyzer, call_expr: &LuaCallExpr) -> Opt
     };
 
     let include_path = string_token.get_value();
-    let founded_module_info = analyzer.db.get_module_index().find_include(
-        &analyzer.db,
-        &include_path,
-        analyzer.get_file_id(),
-    )?;
-    analyzer.add_include_path(founded_module_info.file_id);
+    let source_file_id = analyzer.get_file_id();
+
+    let target_path_on_disk = if include_path.starts_with("@builtin") {
+        None
+    } else {
+        analyzer
+            .db
+            .get_vfs()
+            .get_file_path(&source_file_id)
+            .and_then(|source_path| source_path.parent().map(|p| p.to_path_buf()))
+            .map(|parent| {
+                if include_path.ends_with(".lua") {
+                    parent.join(&include_path)
+                } else {
+                    parent.join(format!("{}/xmake.lua", include_path))
+                }
+            })
+    };
+    if let Some(target_path) = &target_path_on_disk {
+        analyzer
+            .db
+            .get_xmake_index_mut()
+            .add_referenced_path(source_file_id, target_path.clone());
+    }
+
+    let founded_module_info =
+        analyzer
+            .db
+            .get_module_index()
+            .find_include(&analyzer.db, &include_path, source_file_id);
+    if let Some(module_info) = founded_module_info {
+        analyzer.add_include_path(module_info.file_id);
+        return Some(());
+    }
+
+    if let Some(target_path) = target_path_on_disk {
+        if target_path.is_file() {
+            analyzer.defer_load(target_path);
+        }
+    }
 
     Some(())
 }
@@ -190,6 +251,10 @@ fn analyze_add_moduledirs(analyzer: &mut DeclAnalyzer, call_expr: &LuaCallExpr) 
             continue;
         };
         let dir_path = current_dir.join(string_token.get_value());
+        analyzer
+            .db
+            .get_xmake_index_mut()
+            .add_moduledirs(source_file_id, dir_path.clone());
         mark_dir_as_script_scope(analyzer, source_file_id, &dir_path);
     }
 
@@ -218,6 +283,7 @@ fn mark_dir_as_script_scope(analyzer: &mut DeclAnalyzer, source_file_id: FileId,
             continue;
         };
         let Some(file_id) = analyzer.db.get_vfs().get_file_id(&uri) else {
+            analyzer.defer_load(path);
             continue;
         };
         analyzer

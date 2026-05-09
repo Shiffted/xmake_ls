@@ -6,20 +6,40 @@ mod infer_cache_manager;
 mod lua;
 mod unresolve;
 
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+    sync::Arc,
+};
 
-use crate::{Emmyrc, InFiled, InferFailReason, WorkspaceId, db_index::DbIndex, profile::Profile};
+use crate::{
+    Emmyrc, FileId, InFiled, InferFailReason, WorkspaceId, db_index::DbIndex, file_path_to_uri,
+    profile::Profile, vfs::read_file_with_encoding,
+};
 use emmylua_parser::LuaChunk;
 use infer_cache_manager::InferCacheManager;
 use unresolve::UnResolve;
 
+/// Cap recursive auto-loading to avoid pathological include cycles.
+const MAX_DEFERRED_LOAD_DEPTH: u32 = 8;
+
 pub fn analyze(db: &mut DbIndex, need_analyzed_files: Vec<InFiled<LuaChunk>>, config: Arc<Emmyrc>) {
+    analyze_inner(db, need_analyzed_files, config, 0);
+}
+
+fn analyze_inner(
+    db: &mut DbIndex,
+    need_analyzed_files: Vec<InFiled<LuaChunk>>,
+    config: Arc<Emmyrc>,
+    depth: u32,
+) {
     if need_analyzed_files.is_empty() {
         return;
     }
 
-    let contexts = module_analyze(db, need_analyzed_files, config);
+    let contexts = module_analyze(db, need_analyzed_files, config.clone());
 
+    let mut deferred_paths: HashSet<PathBuf> = HashSet::new();
     for (workspace_id, mut context) in contexts {
         let profile_log = format!("analyze workspace {}", workspace_id);
         let _p = Profile::cond_new(&profile_log, context.tree_list.len() > 1);
@@ -28,7 +48,76 @@ pub fn analyze(db: &mut DbIndex, need_analyzed_files: Vec<InFiled<LuaChunk>>, co
         run_analysis::<flow::FlowAnalysisPipeline>(db, &mut context);
         run_analysis::<lua::LuaAnalysisPipeline>(db, &mut context);
         run_analysis::<unresolve::UnResolveAnalysisPipeline>(db, &mut context);
+        deferred_paths.extend(context.deferred_loads);
     }
+
+    if depth >= MAX_DEFERRED_LOAD_DEPTH || deferred_paths.is_empty() {
+        return;
+    }
+
+    let next_batch = drain_deferred_loads(db, deferred_paths, &config);
+    if !next_batch.is_empty() {
+        analyze_inner(db, next_batch, config, depth + 1);
+    }
+}
+
+fn drain_deferred_loads(
+    db: &mut DbIndex,
+    paths: HashSet<PathBuf>,
+    config: &Arc<Emmyrc>,
+) -> Vec<InFiled<LuaChunk>> {
+    let encoding = config.workspace.encoding.clone();
+    let mut new_file_ids: HashSet<FileId> = HashSet::new();
+    let mut affected_sources: HashSet<FileId> = HashSet::new();
+
+    for path in paths {
+        if !path.exists() {
+            continue;
+        }
+        let Some(uri) = file_path_to_uri(&path) else {
+            continue;
+        };
+        if db.get_vfs().get_file_id(&uri).is_some() {
+            continue;
+        }
+        let Some(content) = read_file_with_encoding(&path, &encoding) else {
+            continue;
+        };
+        let file_id = db.get_vfs_mut().set_file_content(&uri, Some(content));
+        new_file_ids.insert(file_id);
+
+        if let Some(path_str) = path.to_str() {
+            db.get_module_index_mut()
+                .add_module_by_path(file_id, path_str);
+        }
+
+        let xmake = db.get_xmake_index();
+        for source in xmake.sources_for_referenced_path(&path) {
+            affected_sources.insert(source);
+        }
+        for source in xmake.sources_for_moduledirs_path(&path) {
+            affected_sources.insert(source);
+        }
+    }
+
+    let mut next: Vec<InFiled<LuaChunk>> = Vec::new();
+    for file_id in new_file_ids.iter().chain(affected_sources.iter()) {
+        if let Some(tree) = db.get_vfs().get_syntax_tree(file_id) {
+            next.push(InFiled {
+                file_id: *file_id,
+                value: tree.get_chunk_node(),
+            });
+        }
+    }
+
+    if !next.is_empty() {
+        let to_remove: Vec<FileId> = affected_sources.into_iter().collect();
+        if !to_remove.is_empty() {
+            db.remove_index(to_remove);
+        }
+    }
+
+    next
 }
 
 trait AnalysisPipeline {
@@ -124,6 +213,7 @@ pub struct AnalyzeContext {
     unresolves: Vec<(UnResolve, InferFailReason)>,
     infer_manager: InferCacheManager,
     workspace_id: WorkspaceId,
+    deferred_loads: HashSet<PathBuf>,
 }
 
 impl AnalyzeContext {
@@ -134,6 +224,7 @@ impl AnalyzeContext {
             unresolves: Vec::new(),
             infer_manager: InferCacheManager::new(),
             workspace_id,
+            deferred_loads: HashSet::new(),
         }
     }
 
@@ -143,5 +234,9 @@ impl AnalyzeContext {
 
     pub fn add_unresolve(&mut self, un_resolve: UnResolve, reason: InferFailReason) {
         self.unresolves.push((un_resolve, reason));
+    }
+
+    pub fn defer_load(&mut self, path: PathBuf) {
+        self.deferred_loads.insert(path);
     }
 }

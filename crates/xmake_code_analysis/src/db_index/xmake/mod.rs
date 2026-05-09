@@ -1,7 +1,10 @@
 mod target;
 mod xmake_function;
 
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    path::PathBuf,
+};
 
 use emmylua_parser::{
     LuaAssignStat, LuaAstNode, LuaCallExpr, LuaClosureExpr, LuaLocalName, LuaLocalStat,
@@ -22,6 +25,8 @@ pub struct LuaXmakeIndex {
     targets_or_packages: HashMap<FileId, Vec<XmakeTarget>>,
     script_scope_files: HashSet<FileId>,
     script_scope_sources: HashMap<FileId, Vec<FileId>>,
+    moduledirs_by_source: HashMap<FileId, Vec<PathBuf>>,
+    referenced_paths_by_source: HashMap<FileId, Vec<PathBuf>>,
 }
 
 impl LuaXmakeIndex {
@@ -31,6 +36,8 @@ impl LuaXmakeIndex {
             targets_or_packages: HashMap::new(),
             script_scope_files: HashSet::new(),
             script_scope_sources: HashMap::new(),
+            moduledirs_by_source: HashMap::new(),
+            referenced_paths_by_source: HashMap::new(),
         }
     }
 
@@ -66,6 +73,50 @@ impl LuaXmakeIndex {
 
     pub fn is_script_scope_file(&self, file_id: FileId) -> bool {
         self.script_scope_files.contains(&file_id)
+    }
+
+    pub fn add_moduledirs(&mut self, source: FileId, dir: PathBuf) {
+        let entry = self.moduledirs_by_source.entry(source).or_default();
+        if !entry.iter().any(|p| p == &dir) {
+            entry.push(dir);
+        }
+    }
+
+    pub fn add_referenced_path(&mut self, source: FileId, path: PathBuf) {
+        let entry = self.referenced_paths_by_source.entry(source).or_default();
+        if !entry.iter().any(|p| p == &path) {
+            entry.push(path);
+        }
+    }
+
+    pub fn sources_for_script_target(&self, target: FileId) -> Vec<FileId> {
+        self.script_scope_sources
+            .iter()
+            .filter_map(|(source, targets)| targets.contains(&target).then_some(*source))
+            .collect()
+    }
+
+    pub fn sources_for_moduledirs_path(&self, path: &std::path::Path) -> Vec<FileId> {
+        self.moduledirs_by_source
+            .iter()
+            .filter_map(|(source, dirs)| {
+                dirs.iter().any(|d| path.starts_with(d)).then_some(*source)
+            })
+            .collect()
+    }
+
+    pub fn sources_for_referenced_path(&self, path: &std::path::Path) -> Vec<FileId> {
+        self.referenced_paths_by_source
+            .iter()
+            .filter_map(|(source, paths)| paths.iter().any(|p| p == path).then_some(*source))
+            .collect()
+    }
+
+    pub fn sources_for_include(&self, included: FileId) -> Vec<FileId> {
+        self.includes_file_ids
+            .iter()
+            .filter_map(|(source, includes)| includes.contains(&included).then_some(*source))
+            .collect()
     }
 }
 
@@ -192,6 +243,8 @@ impl LuaIndex for LuaXmakeIndex {
     fn remove(&mut self, file_id: crate::FileId) {
         self.includes_file_ids.remove(&file_id);
         self.targets_or_packages.remove(&file_id);
+        self.moduledirs_by_source.remove(&file_id);
+        self.referenced_paths_by_source.remove(&file_id);
         if let Some(targets) = self.script_scope_sources.remove(&file_id) {
             for target in targets {
                 let still_referenced = self
@@ -203,7 +256,13 @@ impl LuaIndex for LuaXmakeIndex {
                 }
             }
         }
-        self.script_scope_files.remove(&file_id);
+        let still_target = self
+            .script_scope_sources
+            .values()
+            .any(|v| v.contains(&file_id));
+        if !still_target {
+            self.script_scope_files.remove(&file_id);
+        }
     }
 
     fn clear(&mut self) {
@@ -211,5 +270,7 @@ impl LuaIndex for LuaXmakeIndex {
         self.targets_or_packages.clear();
         self.script_scope_files.clear();
         self.script_scope_sources.clear();
+        self.moduledirs_by_source.clear();
+        self.referenced_paths_by_source.clear();
     }
 }

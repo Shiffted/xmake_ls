@@ -130,10 +130,32 @@ impl XmakeAnalysis {
             .get_vfs_mut()
             .set_file_content(uri, text);
 
-        self.compilation.remove_index(vec![file_id]);
+        let mut directly_changed = HashSet::new();
+        directly_changed.insert(file_id);
+        let affected_sources = self.collect_affected_sources(&directly_changed);
+
+        let mut to_remove: HashSet<FileId> = directly_changed.iter().copied().collect();
+        to_remove.extend(affected_sources.iter().copied());
+        self.compilation
+            .remove_index(to_remove.into_iter().collect());
+
+        let mut to_update: HashSet<FileId> = HashSet::new();
         if !is_removed {
-            self.compilation.update_index(vec![file_id]);
+            to_update.insert(file_id);
         }
+        for source in affected_sources {
+            if self
+                .compilation
+                .get_db()
+                .get_vfs()
+                .get_file_content(&source)
+                .is_some()
+            {
+                to_update.insert(source);
+            }
+        }
+        self.compilation
+            .update_index(to_update.into_iter().collect());
 
         Some(file_id)
     }
@@ -144,28 +166,7 @@ impl XmakeAnalysis {
     }
 
     pub fn update_files_by_uri(&mut self, files: Vec<(Uri, Option<String>)>) -> Vec<FileId> {
-        let mut removed_files = HashSet::new();
-        let mut updated_files = HashSet::new();
-        {
-            let _p = Profile::new("update files");
-            for (uri, text) in files {
-                let is_new_text = text.is_some();
-                let file_id = self
-                    .compilation
-                    .get_db_mut()
-                    .get_vfs_mut()
-                    .set_file_content(&uri, text);
-                removed_files.insert(file_id);
-                if is_new_text {
-                    updated_files.insert(file_id);
-                }
-            }
-        }
-        self.compilation
-            .remove_index(removed_files.into_iter().collect());
-        let updated_files: Vec<FileId> = updated_files.into_iter().collect();
-        self.compilation.update_index(updated_files.clone());
-        updated_files
+        self.update_files_by_uri_inner(files, false)
     }
 
     #[allow(unused)]
@@ -173,7 +174,15 @@ impl XmakeAnalysis {
         &mut self,
         files: Vec<(Uri, Option<String>)>,
     ) -> Vec<FileId> {
-        let mut removed_files = HashSet::new();
+        self.update_files_by_uri_inner(files, true)
+    }
+
+    fn update_files_by_uri_inner(
+        &mut self,
+        files: Vec<(Uri, Option<String>)>,
+        sort: bool,
+    ) -> Vec<FileId> {
+        let mut directly_changed = HashSet::new();
         let mut updated_files = HashSet::new();
         {
             let _p = Profile::new("update files");
@@ -184,18 +193,70 @@ impl XmakeAnalysis {
                     .get_db_mut()
                     .get_vfs_mut()
                     .set_file_content(&uri, text);
-                removed_files.insert(file_id);
+                directly_changed.insert(file_id);
                 if is_new_text {
                     updated_files.insert(file_id);
                 }
             }
         }
+
+        let affected_sources = self.collect_affected_sources(&directly_changed);
+
+        let mut to_remove: HashSet<FileId> = directly_changed.iter().copied().collect();
+        to_remove.extend(affected_sources.iter().copied());
         self.compilation
-            .remove_index(removed_files.into_iter().collect());
+            .remove_index(to_remove.into_iter().collect());
+
+        for source in &affected_sources {
+            if self
+                .compilation
+                .get_db()
+                .get_vfs()
+                .get_file_content(source)
+                .is_some()
+            {
+                updated_files.insert(*source);
+            }
+        }
+
         let mut updated_files: Vec<FileId> = updated_files.into_iter().collect();
-        updated_files.sort();
+        if sort {
+            updated_files.sort();
+        }
         self.compilation.update_index(updated_files.clone());
         updated_files
+    }
+
+    fn collect_affected_sources(&self, changed: &HashSet<FileId>) -> HashSet<FileId> {
+        let db = self.compilation.get_db();
+        let xmake = db.get_xmake_index();
+        let vfs = db.get_vfs();
+        let mut sources = HashSet::new();
+        for file_id in changed {
+            for source in xmake.sources_for_script_target(*file_id) {
+                if !changed.contains(&source) {
+                    sources.insert(source);
+                }
+            }
+            for source in xmake.sources_for_include(*file_id) {
+                if !changed.contains(&source) {
+                    sources.insert(source);
+                }
+            }
+            if let Some(path) = vfs.get_file_path(file_id) {
+                for source in xmake.sources_for_moduledirs_path(path) {
+                    if !changed.contains(&source) {
+                        sources.insert(source);
+                    }
+                }
+                for source in xmake.sources_for_referenced_path(path) {
+                    if !changed.contains(&source) {
+                        sources.insert(source);
+                    }
+                }
+            }
+        }
+        sources
     }
 
     pub fn remove_file_by_uri(&mut self, uri: &Uri) -> Option<FileId> {
