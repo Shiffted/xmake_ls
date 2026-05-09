@@ -433,6 +433,7 @@ pub fn analyze_other(analyzer: &mut DocAnalyzer, other: LuaDocTagOther) -> Optio
             "task" => XmakeScope::Task,
             "toolchain" => XmakeScope::Toolchain,
             "description" => XmakeScope::Description,
+            "root" => XmakeScope::Root,
             "script" => XmakeScope::Script,
             _ => return None,
         };

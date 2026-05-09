@@ -194,6 +194,7 @@ fn apply_xmake_scope_filter(
 
     match containing_target {
         Some(xmake_target) => match (xmake_scope, xmake_target.kind) {
+            (XmakeScope::Root, _) => Some(()),
             (XmakeScope::Package, x) if !x.is_package() => Some(()),
             (XmakeScope::Option, x) if !x.is_option() => Some(()),
             (XmakeScope::Rule, x) if !x.is_rule() => Some(()),
@@ -202,9 +203,9 @@ fn apply_xmake_scope_filter(
             (XmakeScope::Toolchain, x) if !x.is_toolchain() => Some(()),
             _ => None,
         },
-        // At the file top level only target-scoped functions are valid.
+        // At the file top level only target- and root-scoped functions are valid.
         None => match xmake_scope {
-            XmakeScope::Target => None,
+            XmakeScope::Target | XmakeScope::Root => None,
             _ => Some(()),
         },
     }

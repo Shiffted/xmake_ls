@@ -152,7 +152,7 @@ pub fn is_script_scope_position(db: &DbIndex, file_id: FileId, position: TextSiz
         if let Some(closure) = LuaClosureExpr::cast(ancestor) {
             match closure_user_scope(db, file_id, &closure) {
                 Some(XmakeScope::Script) => return true,
-                Some(XmakeScope::Description) => return false,
+                Some(XmakeScope::Description) | Some(XmakeScope::Root) => return false,
                 _ => {}
             }
             if is_callback_arg_closure(&closure) {

@@ -124,6 +124,7 @@ pub enum XmakeScope {
     Task,
     Toolchain,
     Description,
+    Root,
     Script,
 }
 

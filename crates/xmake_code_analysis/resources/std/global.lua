@@ -93,49 +93,49 @@ _ENV = {}
 
 ---
 ---TODO: document `add_moduledirs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_moduledirs(...) end
 
 ---
 ---TODO: document `add_packagedirs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_packagedirs(...) end
 
 ---
 ---TODO: document `add_platformdirs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_platformdirs(...) end
 
 ---
 ---TODO: document `add_plugindirs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_plugindirs(...) end
 
 ---
 ---TODO: document `add_repositories`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_repositories(...) end
 
 ---
 ---TODO: document `add_requireconfs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_requireconfs(...) end
 
 ---
 ---TODO: document `add_requires`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_requires(...) end
 
 ---
 ---TODO: document `add_toolchaindirs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function add_toolchaindirs(...) end
 
@@ -234,7 +234,7 @@ function import(...) end
 
 ---
 ---TODO: document `includes`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function includes(...) end
 
@@ -355,61 +355,61 @@ function todisplay(...) end
 
 ---
 ---TODO: document `set_allowedarchs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_allowedarchs(...) end
 
 ---
 ---TODO: document `set_allowedmodes`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_allowedmodes(...) end
 
 ---
 ---TODO: document `set_allowedplats`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_allowedplats(...) end
 
 ---
 ---TODO: document `set_config`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_config(...) end
 
 ---
 ---TODO: document `set_defaultarchs`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_defaultarchs(...) end
 
 ---
 ---TODO: document `set_defaultmode`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_defaultmode(...) end
 
 ---
 ---TODO: document `set_defaultplat`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_defaultplat(...) end
 
 ---
 ---TODO: document `set_description`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_description(...) end
 
 ---
 ---TODO: document `set_project`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_project(...) end
 
 ---
 ---TODO: document `set_xmakever`.
----@scope description
+---@scope root
 ---@return any ... -- ToDo
 function set_xmakever(...) end
 
