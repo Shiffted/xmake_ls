@@ -40,6 +40,9 @@ pub fn analyze_xmake_function_call(
         XmakeFunction::Task => {
             analyze_target(analyzer, call_expr, XmakeTargetKind::Task);
         }
+        XmakeFunction::Toolchain => {
+            analyze_target(analyzer, call_expr, XmakeTargetKind::Toolchain);
+        }
         _ => {}
     }
 
@@ -280,7 +283,8 @@ fn get_end_position(stat: &LuaStat, target_kind: XmakeTargetKind) -> Option<Text
                     | (XmakeFunction::EndPackage, XmakeTargetKind::Package)
                     | (XmakeFunction::EndOption, XmakeTargetKind::Option)
                     | (XmakeFunction::EndRule, XmakeTargetKind::Rule)
-                    | (XmakeFunction::EndTask, XmakeTargetKind::Task) => {
+                    | (XmakeFunction::EndTask, XmakeTargetKind::Task)
+                    | (XmakeFunction::EndToolchain, XmakeTargetKind::Toolchain) => {
                         return Some(call_expr.get_range().end());
                     }
                     // new target/package starts, stop searching
@@ -289,7 +293,8 @@ fn get_end_position(stat: &LuaStat, target_kind: XmakeTargetKind) -> Option<Text
                         | XmakeFunction::Package
                         | XmakeFunction::Option
                         | XmakeFunction::Rule
-                        | XmakeFunction::Task,
+                        | XmakeFunction::Task
+                        | XmakeFunction::Toolchain,
                         _,
                     ) => {
                         return Some(call_expr.get_position());

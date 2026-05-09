@@ -14,6 +14,7 @@ pub enum XmakeTargetKind {
     Rule,
     Option,
     Task,
+    Toolchain,
 }
 
 impl XmakeTargetKind {
@@ -24,6 +25,7 @@ impl XmakeTargetKind {
             "rule" => Some(XmakeTargetKind::Rule),
             "option" => Some(XmakeTargetKind::Option),
             "task" => Some(XmakeTargetKind::Task),
+            "toolchain" => Some(XmakeTargetKind::Toolchain),
             _ => None,
         }
     }
@@ -46,5 +48,9 @@ impl XmakeTargetKind {
 
     pub fn is_task(&self) -> bool {
         matches!(self, XmakeTargetKind::Task)
+    }
+
+    pub fn is_toolchain(&self) -> bool {
+        matches!(self, XmakeTargetKind::Toolchain)
     }
 }

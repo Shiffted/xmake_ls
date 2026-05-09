@@ -12,11 +12,13 @@ pub enum XmakeFunction {
     Option,
     Rule,
     Task,
+    Toolchain,
     EndTarget,
     EndPackage,
     EndOption,
     EndRule,
     EndTask,
+    EndToolchain,
 }
 
 pub fn get_xmake_function(call_expr: &LuaCallExpr) -> Option<XmakeFunction> {
@@ -42,6 +44,8 @@ pub fn get_xmake_function(call_expr: &LuaCallExpr) -> Option<XmakeFunction> {
         "end_rule" => Some(XmakeFunction::EndRule),
         "task" => Some(XmakeFunction::Task),
         "end_task" => Some(XmakeFunction::EndTask),
+        "toolchain" => Some(XmakeFunction::Toolchain),
+        "end_toolchain" => Some(XmakeFunction::EndToolchain),
         _ => return None,
     }
 }

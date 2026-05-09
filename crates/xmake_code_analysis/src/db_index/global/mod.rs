@@ -195,6 +195,7 @@ fn apply_xmake_scope_filter(
             (XmakeScope::Rule, x) if !x.is_rule() => Some(()),
             (XmakeScope::Target, x) if !x.is_target() => Some(()),
             (XmakeScope::Task, x) if !x.is_task() => Some(()),
+            (XmakeScope::Toolchain, x) if !x.is_toolchain() => Some(()),
             _ => None,
         },
         // At the file top level only target-scoped functions are valid.
