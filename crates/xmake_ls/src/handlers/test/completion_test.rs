@@ -1524,4 +1524,54 @@ function my_script_only_fn() end
         ));
         Ok(())
     }
+
+    #[gtest]
+    fn test_scope_kind_visible_in_outer_description_closure() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope rule
+function add_orders(...) end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                rule("test rule", function()
+                    add_orde<??>
+                end)
+            "#,
+            vec![VirtualCompletionItem {
+                label: "add_orders".to_string(),
+                kind: CompletionItemKind::FUNCTION,
+                label_detail: Some("(...)".to_string()),
+            }],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_scope_kind_hidden_in_inner_script_callback() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope rule
+function add_orders(...) end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                rule("test rule", function()
+                    on_config(function ()
+                        add_orde<??>
+                    end)
+                end)
+            "#,
+            vec![],
+        ));
+        Ok(())
+    }
 }

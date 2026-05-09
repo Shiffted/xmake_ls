@@ -183,6 +183,10 @@ fn apply_xmake_scope_filter(
         _ => {}
     }
 
+    if ctx.is_script_scope {
+        return Some(());
+    }
+
     let containing_target = db
         .get_xmake_index()
         .get_targets(ctx.file_id)
