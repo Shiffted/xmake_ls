@@ -58,7 +58,7 @@ function os.arch() end
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-args)
 ---@scope script
 ---@param args any[] Arguments array
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function os.args(args, options) end
 
@@ -68,7 +68,7 @@ function os.args(args, options) end
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-argv)
 ---@scope script
 ---@param command string Command line string
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function os.argv(command, options) end
 
@@ -97,7 +97,7 @@ function os.cd(path) end
 ---@scope script
 ---@param source string Source path or pattern
 ---@param destination string Destination path
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function os.cp(source, destination, options) end
 
@@ -105,7 +105,7 @@ function os.cp(source, destination, options) end
 --- Get cpu information.
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-cpuinfo)
----@param key string CPU info key (optional)
+---@param key? string CPU info key
 ---@return any ... -- ToDo
 function os.cpuinfo(key) end
 
@@ -194,7 +194,7 @@ function os.exec(command, ...) end
 ---@scope script
 ---@param program string Program name
 ---@param args table Arguments table
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function os.execv(program, args, options) end
 
@@ -310,7 +310,7 @@ function os.iorun(command, ...) end
 ---@scope script
 ---@param program string Program name
 ---@param args table Arguments table
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function os.iorunv(program, args, options) end
 
@@ -430,7 +430,7 @@ function os.mclock() end
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/os#os-meminfo)
 ---@scope script
----@param key string Memory info key (optional)
+---@param key? string Memory info key
 ---@return any ... -- ToDo
 function os.meminfo(key) end
 
@@ -569,7 +569,7 @@ function os.run(command, ...) end
 ---@scope script
 ---@param program string Program name
 ---@param args table Arguments table
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function os.runv(program, args, options) end
 

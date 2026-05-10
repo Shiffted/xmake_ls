@@ -10,7 +10,7 @@ local Jobgraph = {}
 ---[Open in browser](https://xmake.io/api/scripts/extension-modules/async/jobgraph#jobgraph-add)
 ---@param name string Job name string
 ---@param jobfunc function Job function
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function Jobgraph:add(name, jobfunc, options) end
 

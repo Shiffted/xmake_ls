@@ -93,6 +93,8 @@ function debug.collectgarbage(opt, ...) end
 ---
 --- Note that commands for `debug.debug` are not lexically nested within any
 --- function, and so have no direct access to local variables.
+---
+---@return nil
 function debug.debug() end
 
 ---
@@ -393,10 +395,10 @@ function debug.setlocal(thread, level, var, value) end
 --- can be **nil**). Returns value.
 ---
 ---@generic T
+---@overload fun(value: table, meta: T): T
 ---@param value T
 ---@param meta? table
 ---@return T value
----@overload fun(value: table, meta: T): T
 function debug.setmetatable(value, meta) end
 
 ---
@@ -467,4 +469,5 @@ function debug.upvalueid(f, n) end
 ---@param n1 integer
 ---@param f2 fun():any
 ---@param n2 integer
+---@return nil
 function debug.upvaluejoin(f1, n1, f2, n2) end

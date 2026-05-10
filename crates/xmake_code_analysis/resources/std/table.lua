@@ -316,8 +316,8 @@ function table.shallow_join2(target, ...) end
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/table#table-slice)
 ---@param tbl table Table to slice
 ---@param start number Start index
----@param stop number Stop index (optional)
----@param step number Step size (optional)
+---@param stop? number Stop index
+---@param step? number Step size
 ---@return any ... -- ToDo
 function table.slice(tbl, start, stop, step) end
 

@@ -9,9 +9,9 @@ local Option = {}
 ---
 ---[Open in browser](https://xmake.io/api/scripts/option-instance#option-add)
 ---@param key string Configuration key name
----@param value any Value to add
+---@param ... any Values to add
 ---@return any ... -- ToDo
-function Option:add(key, value) end
+function Option:add(key, ...) end
 
 ---
 ---TODO: document `option:cachekey`.

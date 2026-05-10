@@ -365,7 +365,7 @@ function string.serialize(object, opt?) end
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/string#string-split)
 ---@param str string String to split
 ---@param separator string Separator string
----@param options table Split options table (optional)
+---@param options? table Split options table
 ---@return any ... -- ToDo
 function string.split(str, separator, options) end
 

@@ -1,30 +1,39 @@
 ---@meta
 ---[rule](https://xmake.io/api/description/custom-rule)
 
----@class RuleAddDepsOption
----@field order boolean? Whether to execute dependencies in order
-
 ---
---- Define a rule
+--- Define a rule.
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#rule)
+---@scope root
 ---@param name string Rule name
 ---@param func? fun(): nil Rule scoped function
+---@return nil
 function rule(name, func) end
 
+---TODO: add more
+---@class RuleAttr
+
 ---
---- Define a rule
+--- Define a rule.
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#rule)
+---@scope root
 ---@param name string Rule name
----@param attr table Rule attributes
+---@param attr RuleAttr Rule attributes
+---@return nil
 function rule(name, attr) end
 
 ---
---- End rule definition
+--- End rule definition.
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#rule)
+---@scope rule
+---@return nil
 function rule_end() end
+
+---@class RuleAddDepsOption
+---@field order boolean? Whether to execute dependencies in order
 
 ---
 --- Adding rule dependencies.
@@ -33,6 +42,7 @@ function rule_end() end
 ---@scope rule
 ---@param ... string|string[] Dependency rule name string or array
 ---@param options? RuleAddDepsOption
+---@return nil
 function add_deps(..., options) end
 
 ---
@@ -41,12 +51,13 @@ function add_deps(..., options) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#add_imports)
 ---@scope rule
 ---@param ... string|string[] Module name string or array
+---@return nil
 function add_imports(...) end
 
 ---
 ---TODO: document `rule.add_orders`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function add_orders(...) end
 
 ---
@@ -54,7 +65,8 @@ function add_orders(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_build)
 ---@scope rule
----@param script fun(target: Target): nil After build script function with target parameter
+---@param script TargetHook After build script function with target parameter
+---@return nil
 function after_build(script) end
 
 ---
@@ -63,6 +75,7 @@ function after_build(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_build_file)
 ---@scope rule
 ---@param script TargetBuildFileHook After build file script function with target, sourcefile and opt parameters
+---@return nil
 function after_build_file(script) end
 
 ---
@@ -71,12 +84,13 @@ function after_build_file(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_build_files)
 ---@scope rule
 ---@param script TargetBuildFilesHook After build files script function with target, sourcebatch and opt parameters
+---@return nil
 function after_build_files(script) end
 
 ---
 ---TODO: document `rule.after_buildcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_buildcmd(...) end
 
 ---
@@ -85,6 +99,7 @@ function after_buildcmd(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_buildcmd_file)
 ---@scope rule
 ---@param script TargetBuildcmdFileHook After build command file script function with target, batchcmds, sourcefile and opt parameters
+---@return nil
 function after_buildcmd_file(script) end
 
 ---
@@ -93,6 +108,7 @@ function after_buildcmd_file(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_buildcmd_files)
 ---@scope rule
 ---@param script TargetBuildcmdFilesHook After build command files script function with target, batchcmds, sourcebatch and opt parameters
+---@return nil
 function after_buildcmd_files(script) end
 
 ---
@@ -100,7 +116,8 @@ function after_buildcmd_files(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_clean)
 ---@scope rule
----@param script fun(target: Target): nil After clean script function with target parameter
+---@param script TargetHook After clean script function with target parameter
+---@return nil
 function after_clean(script) end
 
 ---
@@ -108,7 +125,8 @@ function after_clean(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_config)
 ---@scope rule
----@param script fun(target: Target): nil After config script function with target parameter
+---@param script TargetHook After config script function with target parameter
+---@return nil
 function after_config(script) end
 
 ---
@@ -116,13 +134,14 @@ function after_config(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_install)
 ---@scope rule
----@param script fun(target: Target): nil After install script function with target parameter
+---@param script TargetHook After install script function with target parameter
+---@return nil
 function after_install(script) end
 
 ---
 ---TODO: document `rule.after_installcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_installcmd(...) end
 
 ---
@@ -130,19 +149,20 @@ function after_installcmd(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_link)
 ---@scope rule
----@param script fun(target: Target): nil After link script function with target parameter
+---@param script TargetHook After link script function with target parameter
+---@return nil
 function after_link(script) end
 
 ---
 ---TODO: document `rule.after_linkcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_linkcmd(...) end
 
 ---
 ---TODO: document `rule.after_load`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_load(...) end
 
 ---
@@ -150,55 +170,56 @@ function after_load(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_package)
 ---@scope rule
----@param script fun(target: Target): nil After package script function with target parameter
+---@param script TargetHook After package script function with target parameter
+---@return nil
 function after_package(script) end
 
 ---
 ---TODO: document `rule.after_prepare`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_prepare(...) end
 
 ---
 ---TODO: document `rule.after_prepare_file`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_prepare_file(...) end
 
 ---
 ---TODO: document `rule.after_prepare_files`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_prepare_files(...) end
 
 ---
 ---TODO: document `rule.after_preparecmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_preparecmd(...) end
 
 ---
 ---TODO: document `rule.after_preparecmd_file`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_preparecmd_file(...) end
 
 ---
 ---TODO: document `rule.after_preparecmd_files`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_preparecmd_files(...) end
 
 ---
 ---TODO: document `rule.after_run`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_run(...) end
 
 ---
 ---TODO: document `rule.after_test`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_test(...) end
 
 ---
@@ -206,13 +227,14 @@ function after_test(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#after_uninstall)
 ---@scope rule
----@param script fun(target: Target): nil After uninstall script function with target parameter
+---@param script TargetHook After uninstall script function with target parameter
+---@return nil
 function after_uninstall(script) end
 
 ---
 ---TODO: document `rule.after_uninstallcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function after_uninstallcmd(...) end
 
 ---
@@ -220,7 +242,8 @@ function after_uninstallcmd(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_build)
 ---@scope rule
----@param script fun(target: Target): nil Before build script function with target parameter
+---@param script TargetHook Before build script function with target parameter
+---@return nil
 function before_build(script) end
 
 ---
@@ -229,6 +252,7 @@ function before_build(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_build_file)
 ---@scope rule
 ---@param script TargetBuildFileHook Before build file script function with target, sourcefile and opt parameters
+---@return nil
 function before_build_file(script) end
 
 ---
@@ -237,12 +261,13 @@ function before_build_file(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_build_files)
 ---@scope rule
 ---@param script TargetBuildFilesHook Before build files script function with target, sourcebatch and opt parameters
+---@return nil
 function before_build_files(script) end
 
 ---
 ---TODO: document `rule.before_buildcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_buildcmd(...) end
 
 ---
@@ -251,6 +276,7 @@ function before_buildcmd(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_buildcmd_file)
 ---@scope rule
 ---@param script TargetBuildcmdFileHook Before build command file script function with target, batchcmds, sourcefile and opt parameters
+---@return nil
 function before_buildcmd_file(script) end
 
 ---
@@ -259,6 +285,7 @@ function before_buildcmd_file(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_buildcmd_files)
 ---@scope rule
 ---@param script TargetBuildcmdFilesHook Before build command files script function with target, batchcmds, sourcebatch and opt parameters
+---@return nil
 function before_buildcmd_files(script) end
 
 ---
@@ -266,7 +293,8 @@ function before_buildcmd_files(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_clean)
 ---@scope rule
----@param script fun(target: Target): nil Before clean script function with target parameter
+---@param script TargetHook Before clean script function with target parameter
+---@return nil
 function before_clean(script) end
 
 ---
@@ -274,7 +302,8 @@ function before_clean(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_config)
 ---@scope rule
----@param script fun(target: Target): nil Before config script function with target parameter
+---@param script TargetHook Before config script function with target parameter
+---@return nil
 function before_config(script) end
 
 ---
@@ -282,13 +311,14 @@ function before_config(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_install)
 ---@scope rule
----@param script fun(target: Target): nil Before install script function with target parameter
+---@param script TargetHook Before install script function with target parameter
+---@return nil
 function before_install(script) end
 
 ---
 ---TODO: document `rule.before_installcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_installcmd(...) end
 
 ---
@@ -296,19 +326,20 @@ function before_installcmd(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_link)
 ---@scope rule
----@param script fun(target: Target): nil Before link script function with target parameter
+---@param script TargetHook Before link script function with target parameter
+---@return nil
 function before_link(script) end
 
 ---
 ---TODO: document `rule.before_linkcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_linkcmd(...) end
 
 ---
 ---TODO: document `rule.before_load`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_load(...) end
 
 ---
@@ -316,55 +347,56 @@ function before_load(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_package)
 ---@scope rule
----@param script fun(target: Target): nil Before package script function with target parameter
+---@param script TargetHook Before package script function with target parameter
+---@return nil
 function before_package(script) end
 
 ---
 ---TODO: document `rule.before_prepare`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_prepare(...) end
 
 ---
 ---TODO: document `rule.before_prepare_file`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_prepare_file(...) end
 
 ---
 ---TODO: document `rule.before_prepare_files`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_prepare_files(...) end
 
 ---
 ---TODO: document `rule.before_preparecmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_preparecmd(...) end
 
 ---
 ---TODO: document `rule.before_preparecmd_file`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_preparecmd_file(...) end
 
 ---
 ---TODO: document `rule.before_preparecmd_files`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_preparecmd_files(...) end
 
 ---
 ---TODO: document `rule.before_run`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_run(...) end
 
 ---
 ---TODO: document `rule.before_test`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_test(...) end
 
 ---
@@ -372,13 +404,14 @@ function before_test(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#before_uninstall)
 ---@scope rule
----@param script fun(target: Target): nil Before uninstall script function with target parameter
+---@param script TargetHook Before uninstall script function with target parameter
+---@return nil
 function before_uninstall(script) end
 
 ---
 ---TODO: document `rule.before_uninstallcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function before_uninstallcmd(...) end
 
 ---
@@ -386,7 +419,8 @@ function before_uninstallcmd(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_build)
 ---@scope rule
----@param script fun(target: Target): nil Build script function with target parameter
+---@param script TargetHook Build script function with target parameter
+---@return nil
 function on_build(script) end
 
 ---
@@ -395,6 +429,7 @@ function on_build(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_build_file)
 ---@scope rule
 ---@param script TargetBuildFileHook Build file script function with target, sourcefile and opt parameters
+---@return nil
 function on_build_file(script) end
 
 ---
@@ -403,12 +438,13 @@ function on_build_file(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_build_files)
 ---@scope rule
 ---@param script TargetBuildFilesHook Build files script function with target, sourcebatch and opt parameters
+---@return nil
 function on_build_files(script) end
 
 ---
 ---TODO: document `rule.on_buildcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_buildcmd(...) end
 
 ---
@@ -417,6 +453,7 @@ function on_buildcmd(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_buildcmd_file)
 ---@scope rule
 ---@param script TargetBuildcmdFileHook Build command file script function with target, batchcmds, sourcefile and opt parameters
+---@return nil
 function on_buildcmd_file(script) end
 
 ---
@@ -425,6 +462,7 @@ function on_buildcmd_file(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_buildcmd_files)
 ---@scope rule
 ---@param script TargetBuildcmdFilesHook Build command files script function with target, batchcmds, sourcebatch and opt parameters
+---@return nil
 function on_buildcmd_files(script) end
 
 ---
@@ -432,7 +470,8 @@ function on_buildcmd_files(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_clean)
 ---@scope rule
----@param script fun(target: Target): nil Clean script function with target parameter
+---@param script TargetHook Clean script function with target parameter
+---@return nil
 function on_clean(script) end
 
 ---
@@ -440,7 +479,8 @@ function on_clean(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_config)
 ---@scope rule
----@param script fun(target: Target): nil Configuration script function with target parameter
+---@param script TargetHook Configuration script function with target parameter
+---@return nil
 function on_config(script) end
 
 ---
@@ -448,13 +488,14 @@ function on_config(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_install)
 ---@scope rule
----@param script fun(target: Target): nil Install script function with target parameter
+---@param script TargetHook Install script function with target parameter
+---@return nil
 function on_install(script) end
 
 ---
 ---TODO: document `rule.on_installcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_installcmd(...) end
 
 ---
@@ -462,13 +503,14 @@ function on_installcmd(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_link)
 ---@scope rule
----@param script fun(target: Target): nil Link script function with target parameter
+---@param script TargetHook Link script function with target parameter
+---@return nil
 function on_link(script) end
 
 ---
 ---TODO: document `rule.on_linkcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_linkcmd(...) end
 
 ---
@@ -476,7 +518,8 @@ function on_linkcmd(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_load)
 ---@scope rule
----@param script fun(target: Target): nil Load script function with target parameter
+---@param script TargetHook Load script function with target parameter
+---@return nil
 function on_load(script) end
 
 ---
@@ -484,55 +527,56 @@ function on_load(script) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_package)
 ---@scope rule
----@param script fun(target: Target): nil Package script function with target parameter
+---@param script TargetHook Package script function with target parameter
+---@return nil
 function on_package(script) end
 
 ---
 ---TODO: document `rule.on_prepare`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_prepare(...) end
 
 ---
 ---TODO: document `rule.on_prepare_file`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_prepare_file(...) end
 
 ---
 ---TODO: document `rule.on_prepare_files`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_prepare_files(...) end
 
 ---
 ---TODO: document `rule.on_preparecmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_preparecmd(...) end
 
 ---
 ---TODO: document `rule.on_preparecmd_file`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_preparecmd_file(...) end
 
 ---
 ---TODO: document `rule.on_preparecmd_files`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_preparecmd_files(...) end
 
 ---
 ---TODO: document `rule.on_run`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_run(...) end
 
 ---
 ---TODO: document `rule.on_test`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_test(...) end
 
 ---
@@ -540,13 +584,14 @@ function on_test(...) end
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-rule#on_uninstall)
 ---@scope rule
----@param script fun(target: Target): nil Uninstall script function with target parameter
+---@param script TargetHook Uninstall script function with target parameter
+---@return nil
 function on_uninstall(script) end
 
 ---
 ---TODO: document `rule.on_uninstallcmd`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function on_uninstallcmd(...) end
 
 ---
@@ -555,16 +600,17 @@ function on_uninstallcmd(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-rule#set_extensions)
 ---@scope rule
 ---@param ... string|string[] File extension string or array
+---@return nil
 function set_extensions(...) end
 
 ---
 ---TODO: document `rule.set_kind`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function set_kind(...) end
 
 ---
 ---TODO: document `rule.set_sourcekinds`.
 ---@scope rule
----@return any ... -- ToDo
+---@return nil
 function set_sourcekinds(...) end

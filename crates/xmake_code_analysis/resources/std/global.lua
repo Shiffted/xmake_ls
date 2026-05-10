@@ -1,17 +1,5 @@
 ---@meta no-require
--- Copyright (c) 2018. tangzx(love.tangzx@qq.com)
---
--- Licensed under the Apache License, Version 2.0 (the "License"); you may not
--- use this file except in compliance with the License. You may obtain a copy of
--- the License at
---
--- http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
--- WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
--- License for the specific language governing permissions and limitations under
--- the License.
+-- global
 
 ---@alias std.collectgarbage_opt
 ---|>"collect" # performs a full garbage-collection cycle. This is the default option.
@@ -85,6 +73,7 @@ _VERSION = "Lua 5.4"
 ---@type string[]
 arg = {}
 
+---
 --- This is an incorrect annotation, but truly supporting _ENV would completely break the variable analysis path.
 --- For now, let's treat it as a global variable.
 ---@version > 5.3
@@ -92,51 +81,67 @@ arg = {}
 _ENV = {}
 
 ---
----TODO: document `add_moduledirs`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#add_moduledirs)
 ---@scope root
----@return any ... -- ToDo
+---@param ... string|string[] Module directory path
+---@return nil
 function add_moduledirs(...) end
 
 ---
 ---TODO: document `add_packagedirs`.
 ---@scope root
----@return any ... -- ToDo
+---@return nil
 function add_packagedirs(...) end
 
 ---
 ---TODO: document `add_platformdirs`.
 ---@scope root
----@return any ... -- ToDo
+---@return nil
 function add_platformdirs(...) end
 
 ---
----TODO: document `add_plugindirs`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#add_plugindirs)
 ---@scope root
----@return any ... -- ToDo
-function add_plugindirs(...) end
+---@param dirs string|array Plugin directory path string or array
+---@param ... any Variable parameters, can pass multiple directory paths
+---@return nil
+function add_plugindirs(dirs, ...) end
+
+---@class AddRepositoriesOptions
+---@field rootdir? string Repository name and URL string or array, format: "name url"
 
 ---
----TODO: document `add_repositories`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#add_repositories)
 ---@scope root
----@return any ... -- ToDo
-function add_repositories(...) end
+---@param ... string|array Repository name and URL string or array, format: "name url"
+---@param options? AddRepositoriesOptions
+---@return nil
+function add_repositories(..., options) end
+
+---@class AddRequireconfsOptions
+---@field rootdir? string Repository name and URL string or array, format: "name url"
 
 ---
----TODO: document `add_requireconfs`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#add_requireconfs)
 ---@scope root
----@return any ... -- ToDo
-function add_requireconfs(...) end
+---@param packages string|array Package name string or array, supports pattern matching like "*" or "libpng.zlib"
+---@param options? {configs?: table, override?: boolean, version?: string, debug?: boolean, ...: any}
+---@return nil
+function add_requireconfs(packages, ..., options) end
 
 ---
----TODO: document `add_requires`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#add_requires)
 ---@scope root
----@return any ... -- ToDo
-function add_requires(...) end
+---@param packages string|array Package name string or array, supports semantic version like "tbox 1.6.*"
+---@param ... any Other package-specific configuration parameters
+---@param options? {optional?: boolean, system?: boolean, verify?: boolean, debug?: boolean, private?: boolean, configs?: table, alias?: string, ...: any}
+---@return nil
+function add_requires(packages, ..., options) end
 
 ---
 ---TODO: document `add_toolchaindirs`.
 ---@scope root
----@return any ... -- ToDo
+---@return nil
 function add_toolchaindirs(...) end
 
 ---
@@ -161,25 +166,25 @@ function catch(...) end
 ---
 ---TODO: document `cprint`.
 ---@scope script
----@return any ... -- ToDo
+---@return nil
 function cprint(...) end
 
 ---
 ---TODO: document `cprintf`.
 ---@scope script
----@return any ... -- ToDo
+---@return nil
 function cprintf(...) end
 
 ---
 ---TODO: document `dprint`.
 ---@scope script
----@return any ... -- ToDo
+---@return nil
 function dprint(...) end
 
 ---
 ---TODO: document `dprintf`.
 ---@scope script
----@return any ... -- ToDo
+---@return nil
 function dprintf(...) end
 
 ---
@@ -206,9 +211,10 @@ function find_packages(...) end
 function format(...) end
 
 ---
----TODO: document `get_config`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#get_config)
+---@param name string Configuration option name string
 ---@return any ... -- ToDo
-function get_config(...) end
+function get_config(name) end
 
 ---
 ---TODO: document `getenv`.
@@ -217,14 +223,18 @@ function get_config(...) end
 function getenv(...) end
 
 ---
----TODO: document `has_config`.
+---[Open in browser](https://xmake.io/api/description/conditions#has_config)
+---@param configs string Configuration name string
+---@param ... any Variable parameters, can pass multiple configuration names
 ---@return any ... -- ToDo
-function has_config(...) end
+function has_config(configs, ...) end
 
 ---
----TODO: document `has_package`.
+---[Open in browser](https://xmake.io/api/description/conditions#has_package)
+---@param packages string Package name string
+---@param ... any Variable parameters, can pass multiple package names
 ---@return any ... -- ToDo
-function has_package(...) end
+function has_package(packages, ...) end
 
 ---
 ---TODO: document `import`.
@@ -233,10 +243,13 @@ function has_package(...) end
 function import(...) end
 
 ---
----TODO: document `includes`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#includes)
 ---@scope root
+---@param paths string|array Sub-project file or directory path, supports pattern matching like "**/xmake.lua"
+---@param ... any Variable parameters, can pass multiple paths
+---@param options? {rootdir?: string}
 ---@return any ... -- ToDo
-function includes(...) end
+function includes(paths, ..., options) end
 
 ---
 ---TODO: document `inherit`.
@@ -263,52 +276,69 @@ function ipairs(t) end
 function irpairs(...) end
 
 ---
----TODO: document `is_arch`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_arch)
+---@param arch string Architecture name string
+---@param ... any Variable parameters, can pass multiple architecture names
 ---@return any ... -- ToDo
-function is_arch(...) end
+function is_arch(arch, ...) end
 
 ---
----TODO: document `is_config`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_config)
+---@param name string Configuration option name string
+---@param values string Configuration value string
+---@param ... any Variable parameters, can pass multiple values
 ---@return any ... -- ToDo
-function is_config(...) end
+function is_config(name, values, ...) end
 
 ---
----TODO: document `is_cross`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_cross)
 ---@scope description
 ---@return any ... -- ToDo
-function is_cross(...) end
+function is_cross() end
 
 ---
----TODO: document `is_host`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_host)
+---@param host string Host system name string
+---@param ... any Variable parameters, can pass multiple host names
 ---@return any ... -- ToDo
-function is_host(...) end
+function is_host(host, ...) end
 
 ---
----TODO: document `is_kind`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_kind)
 ---@scope description
+---@param kind string Target kind name string
+---@param ... any Variable parameters, can pass multiple kind names
 ---@return any ... -- ToDo
-function is_kind(...) end
+function is_kind(kind, ...) end
 
 ---
----TODO: document `is_mode`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_mode)
+---@param mode string Compilation mode name string
+---@param ... any Variable parameters, can pass multiple mode names
 ---@return any ... -- ToDo
-function is_mode(...) end
+function is_mode(mode, ...) end
 
 ---
----TODO: document `is_os`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_os)
 ---@scope description
+---@param os string Operating system name string
+---@param ... any Variable parameters, can pass multiple OS names
 ---@return any ... -- ToDo
-function is_os(...) end
+function is_os(os, ...) end
 
 ---
----TODO: document `is_plat`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_plat)
+---@param plat string Platform name string
+---@param ... any Variable parameters, can pass multiple platform names
 ---@return any ... -- ToDo
-function is_plat(...) end
+function is_plat(plat, ...) end
 
 ---
----TODO: document `is_subhost`.
+---[Open in browser](https://xmake.io/api/description/conditions#is_subhost)
+---@param subhost string Subsystem name string
+---@param ... any Variable parameters, can pass multiple subsystem names
 ---@return any ... -- ToDo
-function is_subhost(...) end
+function is_subhost(subhost, ...) end
 
 ---
 --- If `t` has a metamethod `__pairs`, calls it with `t` as argument and returns
@@ -334,11 +364,12 @@ function pairs(t) end
 --- for instance for debugging. For complete control over the output, use
 --- `string.format` and `io.write`.
 ---
+---@return nil
 function print(...) end
 
 ---
 ---TODO: document `printf`.
----@return any ... -- ToDo
+---@return nil
 function printf(...) end
 
 ---
@@ -354,64 +385,78 @@ function raise(...) end
 function todisplay(...) end
 
 ---
----TODO: document `set_allowedarchs`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_allowedarchs)
 ---@scope root
----@return any ... -- ToDo
-function set_allowedarchs(...) end
+---@param archs string|array Allowed compilation architecture string or array, supports platform-specific format like "windows
+---@param ... any Variable parameters, can pass multiple architecture specifications
+---@return nil
+function set_allowedarchs(archs, ...) end
 
 ---
----TODO: document `set_allowedmodes`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_allowedmodes)
 ---@scope root
----@return any ... -- ToDo
-function set_allowedmodes(...) end
+---@param modes string|array Allowed compilation mode name string or array
+---@param ... any Variable parameters, can pass multiple mode names
+---@return nil
+function set_allowedmodes(modes, ...) end
 
 ---
----TODO: document `set_allowedplats`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_allowedplats)
 ---@scope root
----@return any ... -- ToDo
-function set_allowedplats(...) end
+---@param platforms string|array Allowed compilation platform name string or array
+---@param ... any Variable parameters, can pass multiple platform names
+---@return nil
+function set_allowedplats(platforms, ...) end
 
 ---
----TODO: document `set_config`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_config)
 ---@scope root
----@return any ... -- ToDo
-function set_config(...) end
+---@param name string Configuration option name string
+---@param value string|boolean|number Configuration value, can be string, boolean, or number
+---@return nil
+function set_config(name, value) end
 
 ---
----TODO: document `set_defaultarchs`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_defaultarchs)
 ---@scope root
----@return any ... -- ToDo
-function set_defaultarchs(...) end
+---@param archs string|array Default compilation architecture string or array, supports platform-specific format like "iphoneos
+---@param ... any Variable parameters, can pass multiple architecture specifications
+---@return nil
+function set_defaultarchs(archs, ...) end
 
 ---
----TODO: document `set_defaultmode`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_defaultmode)
 ---@scope root
----@return any ... -- ToDo
-function set_defaultmode(...) end
+---@param mode string Default compilation mode name, e.g. "release", "debug", "releasedbg"
+---@return nil
+function set_defaultmode(mode) end
 
 ---
----TODO: document `set_defaultplat`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_defaultplat)
 ---@scope root
----@return any ... -- ToDo
-function set_defaultplat(...) end
+---@param platform string Default compilation platform name, e.g. "iphoneos", "windows"
+---@return nil
+function set_defaultplat(platform) end
 
 ---
 ---TODO: document `set_description`.
 ---@scope root
----@return any ... -- ToDo
+---@return nil
 function set_description(...) end
 
 ---
----TODO: document `set_project`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_project)
 ---@scope root
----@return any ... -- ToDo
-function set_project(...) end
+---@param name string Project name string
+---@return nil
+function set_project(name) end
 
 ---
----TODO: document `set_xmakever`.
+---[Open in browser](https://xmake.io/api/description/global-interfaces#set_xmakever)
 ---@scope root
----@return any ... -- ToDo
-function set_xmakever(...) end
+---@param version string Minimum required xmake version string, e.g. "2.1.0"
+---@return nil
+function set_xmakever(version) end
 
 ---
 --- When called with no `base`, `tonumber` tries to convert its argument to a
@@ -489,51 +534,36 @@ function vformat(...) end
 ---
 ---TODO: document `vprint`.
 ---@scope script
----@return any ... -- ToDo
+---@return nil
 function vprint(...) end
 
 ---
 ---TODO: document `vprintf`.
 ---@scope script
----@return any ... -- ToDo
+---@return nil
 function vprintf(...) end
 
 ---
 ---TODO: document `wprint`.
 ---@scope script
----@return any ... -- ToDo
+---@return nil
 function wprint(...) end
 
 
 -- TODO: xmake doesn't support the functions below, but some tests expect them to be present.
 
----
---- Calls function `f` with the given arguments in *protected mode*. This
---- means that any error inside `f` is not propagated; instead, `pcall` catches
---- the error and returns a status code. Its first result is the status code (a
---- boolean), which is true if the call succeeds without errors. In such case,
---- `pcall` also returns all results from the call, after this first result. In
---- case of any error, `pcall` returns **false** plus the error message.
 ---@generic T, R, R1
 ---@param f sync fun(...: T...): R1, R...
 ---@param ... T...
 ---@return boolean, R1|string, R...
 function pcall(f, ...) end
 
----
---- Gets the real value of `table[index]`, the `__index` metamethod. `table`
---- must be a table; `index` may be any value.
 ---@generic T, K
 ---@param table T
 ---@param index std.ConstTpl<K>
 ---@return std.RawGet<T, K>
 function rawget(table, index) end
 
----
---- If `index` is a number, returns all arguments after argument number
---- `index`. a negative number indexes from the end (-1 is the last argument).
---- Otherwise, `index` must be the string "#", and `select` returns
---- the total number of extra arguments it received.
 ---@generic T, Num: integer | '#'
 ---@param index std.ConstTpl<Num>
 ---@param ... T...

@@ -77,15 +77,15 @@ function hash.strhash64(input) end
 --- Generate a UUID based on a name.
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/hash#hash-uuid)
----@param name string Name string for UUID generation
+---@param name? string Name string for UUID generation
 ---@return any ... -- ToDo
 function hash.uuid(name) end
 
 ---
 --- Generate a random UUID (version 4).
 ---
----@param name string Name string for UUID4 generation
----@return string
+---@param name? string Name string for UUID4 generation
+---@return any ... -- ToDo
 function hash.uuid4(...) end
 
 ---

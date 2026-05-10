@@ -9,9 +9,9 @@ local Target = {}
 ---
 ---[Open in browser](https://xmake.io/api/scripts/target-instance#target-add)
 ---@param key string Configuration key name
----@param value any Value to add
+---@param ... any Values to add
 ---@return any ... -- ToDo
-function Target:add(key, value) end
+function Target:add(key, ...) end
 
 ---
 ---TODO: document `target:arch`.

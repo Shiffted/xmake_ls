@@ -2,241 +2,247 @@
 ---[toolchain](https://xmake.io/api/description/custom-toolchain)
 
 ---
---- Define a toolchain
+--- Define a toolchain.
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#toolchain)
+---@scope root
 ---@param name string Toolchain name
 ---@param func? fun(): nil Toolchain scoped function
+---@return nil
 function toolchain(name, func) end
 
 ---
---- Define a toolchain
+--- Define a toolchain.
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#toolchain)
+---@scope root
 ---@param name string Toolchain name
 ---@param attr table Toolchain attributes
+---@return nil
 function toolchain(name, attr) end
 
 ---
---- End toolchain definition
+--- End toolchain definition.
 ---
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#toolchain)
+---@scope toolchain
+---@return nil
 function toolchain_end() end
 
 ---
 ---TODO: document `toolchain.add_arflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_arflags(...) end
 
 ---
 ---TODO: document `toolchain.add_asflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_asflags(...) end
 
 ---
 ---TODO: document `toolchain.add_cflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_cflags(...) end
 
 ---
 ---TODO: document `toolchain.add_csflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_csflags(...) end
 
 ---
 ---TODO: document `toolchain.add_cuflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_cuflags(...) end
 
 ---
 ---TODO: document `toolchain.add_cugencodes`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_cugencodes(...) end
 
 ---
 ---TODO: document `toolchain.add_culdflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_culdflags(...) end
 
 ---
 ---TODO: document `toolchain.add_cxflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_cxflags(...) end
 
 ---
 ---TODO: document `toolchain.add_cxxflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_cxxflags(...) end
 
 ---
 ---TODO: document `toolchain.add_dcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_dcflags(...) end
 
 ---
 ---TODO: document `toolchain.add_defines`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_defines(...) end
 
 ---
 ---TODO: document `toolchain.add_fcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_fcflags(...) end
 
 ---
 ---TODO: document `toolchain.add_frameworkdirs`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_frameworkdirs(...) end
 
 ---
 ---TODO: document `toolchain.add_frameworks`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_frameworks(...) end
 
 ---
 ---TODO: document `toolchain.add_gcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_gcflags(...) end
 
 ---
 ---TODO: document `toolchain.add_includedirs`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_includedirs(...) end
 
 ---
 ---TODO: document `toolchain.add_kcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_kcflags(...) end
 
 ---
 ---TODO: document `toolchain.add_ldflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_ldflags(...) end
 
 ---
 ---TODO: document `toolchain.add_linkdirs`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_linkdirs(...) end
 
 ---
 ---TODO: document `toolchain.add_links`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_links(...) end
 
 ---
 ---TODO: document `toolchain.add_mflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_mflags(...) end
 
 ---
 ---TODO: document `toolchain.add_mrcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_mrcflags(...) end
 
 ---
 ---TODO: document `toolchain.add_mxflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_mxflags(...) end
 
 ---
 ---TODO: document `toolchain.add_mxxflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_mxxflags(...) end
 
 ---
 ---TODO: document `toolchain.add_ncflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_ncflags(...) end
 
 ---
 ---TODO: document `toolchain.add_pcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_pcflags(...) end
 
 ---
 ---TODO: document `toolchain.add_rcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_rcflags(...) end
 
 ---
 ---TODO: document `toolchain.add_rpathdirs`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_rpathdirs(...) end
 
 ---
 ---TODO: document `toolchain.add_runenvs`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_runenvs(...) end
 
 ---
 ---TODO: document `toolchain.add_scflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_scflags(...) end
 
 ---
 ---TODO: document `toolchain.add_shflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_shflags(...) end
 
 ---
 ---TODO: document `toolchain.add_sysincludedirs`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_sysincludedirs(...) end
 
 ---
 ---TODO: document `toolchain.add_syslinks`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_syslinks(...) end
 
 ---
 ---TODO: document `toolchain.add_toolset`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_toolset(...) end
 
 ---
 ---TODO: document `toolchain.add_undefines`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_undefines(...) end
 
 ---
 ---TODO: document `toolchain.add_zcflags`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function add_zcflags(...) end
 
 ---
@@ -245,6 +251,7 @@ function add_zcflags(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#on_check)
 ---@scope toolchain
 ---@param script fun(toolchain: Toolchain): string Check script function with toolchain parameter
+---@return nil
 function on_check(script) end
 
 ---
@@ -253,12 +260,13 @@ function on_check(script) end
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#on_load)
 ---@scope toolchain
 ---@param script fun(toolchain: Toolchain): nil Load script function with toolchain parameter
+---@return nil
 function on_load(script) end
 
 ---
 ---TODO: document `toolchain.set_archs`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function set_archs(...) end
 
 ---
@@ -267,30 +275,31 @@ function set_archs(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#set_bindir)
 ---@scope toolchain
 ---@param bindir string Binary directory path string
+---@return nil
 function set_bindir(bindir) end
 
 ---
 ---TODO: document `toolchain.set_cross`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function set_cross(...) end
 
 ---
 ---TODO: document `toolchain.set_description`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function set_description(...) end
 
 ---
 ---TODO: document `toolchain.set_formats`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function set_formats(...) end
 
 ---
 ---TODO: document `toolchain.set_homepage`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function set_homepage(...) end
 
 ---
@@ -299,12 +308,13 @@ function set_homepage(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#set_kind)
 ---@scope toolchain
 ---@param kind string Toolchain type: "standalone"
+---@return nil
 function set_kind(kind) end
 
 ---
 ---TODO: document `toolchain.set_runtimes`.
 ---@scope toolchain
----@return any ... -- ToDo
+---@return nil
 function set_runtimes(...) end
 
 ---
@@ -313,6 +323,7 @@ function set_runtimes(...) end
 ---[Open in browser](https://xmake.io/api/description/custom-toolchain#set_sdkdir)
 ---@scope toolchain
 ---@param sdkdir string SDK directory path string
+---@return nil
 function set_sdkdir(sdkdir) end
 
 ---
@@ -322,4 +333,5 @@ function set_sdkdir(sdkdir) end
 ---@scope toolchain
 ---@param tool string Tool name string (cc, cxx, ld, sh, ar, ex, strip, mm, mxx, as)
 ---@param ... string|string[] Tool program name string or array
+---@return nil
 function set_toolset(tool, ...) end

@@ -9,9 +9,9 @@ local Package = {}
 ---
 ---[Open in browser](https://xmake.io/api/scripts/package-instance#package-add)
 ---@param key string Configuration key name
----@param value any Value to add
+---@param ... any Values to add
 ---@return any ... -- ToDo
-function Package:add(key, value) end
+function Package:add(key, ...) end
 
 ---
 --- Add the given values to the environment variable.

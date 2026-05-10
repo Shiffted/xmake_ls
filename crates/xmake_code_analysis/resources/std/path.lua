@@ -9,7 +9,7 @@ path = {}
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-absolute)
 ---@param path string Path string to convert
----@param rootdir string Root directory for absolute conversion
+---@param rootdir? string Root directory for absolute conversion (default relative to the current directory)
 ---@return any ... -- ToDo
 function path.absolute(path, rootdir) end
 
@@ -54,7 +54,7 @@ function path.envsep() end
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-extension)
 ---@param path string Path string
----@param level? number
+---@param level? number (default is 1)
 ---@return any ... -- ToDo
 function path.extension(path, level?) end
 
@@ -137,7 +137,7 @@ function path.pattern(path) end
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/path#path-relative)
 ---@param path string Path string to convert
----@param rootdir string Root directory for relative conversion
+---@param rootdir? string Root directory for relative conversion (default relative to the current directory)
 ---@return any ... -- ToDo
 function path.relative(path, rootdir) end
 

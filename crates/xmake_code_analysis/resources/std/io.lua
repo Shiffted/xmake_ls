@@ -80,7 +80,7 @@ function io.isatty(file?) end
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-lines)
 ---@param filename string File path string
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function io.lines(filename, options) end
 
@@ -98,7 +98,7 @@ function io.load(filename) end
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-open)
 ---@param filename string File path string
 ---@param mode string Open mode string
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function io.open(filename, mode, options) end
 
@@ -150,7 +150,7 @@ function io.readable() end
 ---
 ---[Open in browser](https://xmake.io/api/scripts/builtin-modules/io#io-readfile)
 ---@param filename string File path string
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function io.readfile(filename, options) end
 
@@ -161,7 +161,7 @@ function io.readfile(filename, options) end
 ---@param filename string File path string
 ---@param pattern string Pattern string
 ---@param replacement string Replacement string
----@param options table Options table (optional)
+---@param options? table Options table
 ---@return any ... -- ToDo
 function io.replace(filename, pattern, replacement, options) end
 
