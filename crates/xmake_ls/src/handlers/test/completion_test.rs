@@ -1574,4 +1574,112 @@ function add_orders(...) end
         ));
         Ok(())
     }
+
+    #[gtest]
+    fn test_user_scope_rule_visible_in_user_function() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope rule
+function add_orders(...) end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                ---@scope rule
+                function configure_my_rule()
+                    add_orde<??>
+                end
+            "#,
+            vec![VirtualCompletionItem {
+                label: "add_orders".to_string(),
+                kind: CompletionItemKind::FUNCTION,
+                label_detail: Some("(...)".to_string()),
+            }],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_user_scope_target_hides_rule_only_function() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope rule
+function add_orders(...) end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                ---@scope target
+                function configure_my_target()
+                    add_orde<??>
+                end
+            "#,
+            vec![],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_user_scope_overrides_outer_target() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope rule
+function add_orders(...) end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                target("foo", function()
+                    ---@scope rule
+                    local helper = function()
+                        add_orde<??>
+                    end
+                end)
+            "#,
+            vec![VirtualCompletionItem {
+                label: "add_orders".to_string(),
+                kind: CompletionItemKind::FUNCTION,
+                label_detail: Some("(...)".to_string()),
+            }],
+        ));
+        Ok(())
+    }
+
+    #[gtest]
+    fn test_user_scope_root_inside_target_shows_root_only_function() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new();
+        ws.def_file(
+            "meta.lua",
+            r#"---@meta
+---@scope root
+function set_my_project(...) end
+"#,
+        );
+
+        check!(ws.check_completion(
+            r#"
+                target("foo", function()
+                    ---@scope root
+                    local helper = function()
+                        set_my_proj<??>
+                    end
+                end)
+            "#,
+            vec![VirtualCompletionItem {
+                label: "set_my_project".to_string(),
+                kind: CompletionItemKind::FUNCTION,
+                label_detail: Some("(...)".to_string()),
+            }],
+        ));
+        Ok(())
+    }
 }

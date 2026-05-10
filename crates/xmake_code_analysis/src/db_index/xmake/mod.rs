@@ -121,46 +121,60 @@ impl LuaXmakeIndex {
 }
 
 /// Whether `position` in `file_id` is inside an xmake script-scope context.
-///
-/// Three ways to qualify:
-/// 1. The whole file is registered as script-scope (e.g. it was named in
-///    `on_run("foo")` or it lives under a directory passed to
-///    `add_moduledirs(...)`).
-/// 2. The position is inside a callback that is the argument to an
-///    xmake `on_*`/`before_*`/`after_*` callback registration.
-/// 3. The position is inside a closure whose user-defined `@scope` tag
-///    classifies it as `script`.
 pub fn is_script_scope_position(db: &DbIndex, file_id: FileId, position: TextSize) -> bool {
+    resolve_position_scope(db, file_id, position).0
+}
+
+/// Resolve the xmake scope context at `position` in `file_id`.
+///
+/// Returns `(is_script_scope, user_scope)`:
+/// - `is_script_scope` is true when the position is inside an xmake
+///   script-scope context — qualified by any of:
+///   1. the whole file is registered as script-scope (e.g. it was named in
+///      `on_run("foo")` or it lives under a directory passed to
+///      `add_moduledirs(...)`),
+///   2. the position is inside a callback that is the argument to an
+///      xmake `on_*`/`before_*`/`after_*` callback registration,
+///   3. the position is inside a closure whose user-defined `@scope` tag
+///      classifies it as `script`.
+/// - `user_scope` is the closest enclosing closure's user-defined `@scope`
+///   tag, if any. It overrides the position-based containing-target lookup
+///   so that a `@scope target` (or any specific scope) tag forces the body
+///   to be treated as if inside that scope.
+pub fn resolve_position_scope(
+    db: &DbIndex,
+    file_id: FileId,
+    position: TextSize,
+) -> (bool, Option<XmakeScope>) {
     if db.get_xmake_index().is_script_scope_file(file_id) {
-        return true;
+        return (true, None);
     }
 
     let Some(syntax_tree) = db.get_vfs().get_syntax_tree(&file_id) else {
-        return false;
+        return (false, None);
     };
     let root = syntax_tree.get_red_root();
     let token = match root.token_at_offset(position) {
-        rowan::TokenAtOffset::None => return false,
+        rowan::TokenAtOffset::None => return (false, None),
         rowan::TokenAtOffset::Single(t) => t,
         rowan::TokenAtOffset::Between(_, right) => right,
     };
 
     let Some(parent) = token.parent() else {
-        return false;
+        return (false, None);
     };
     for ancestor in parent.ancestors() {
         if let Some(closure) = LuaClosureExpr::cast(ancestor) {
-            match closure_user_scope(db, file_id, &closure) {
-                Some(XmakeScope::Script) => return true,
-                Some(XmakeScope::Description) | Some(XmakeScope::Root) => return false,
-                _ => {}
+            if let Some(scope) = closure_user_scope(db, file_id, &closure) {
+                let is_script = matches!(scope, XmakeScope::Script);
+                return (is_script, Some(scope));
             }
             if is_callback_arg_closure(&closure) {
-                return true;
+                return (true, None);
             }
         }
     }
-    false
+    (false, None)
 }
 
 fn closure_user_scope(

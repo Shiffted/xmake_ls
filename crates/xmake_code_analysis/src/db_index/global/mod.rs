@@ -7,7 +7,7 @@ use rowan::TextSize;
 
 use crate::{
     FileId, LuaSemanticDeclId, LuaSignatureId, LuaType, TypeVisitTrait, XmakeScope,
-    is_script_scope_position,
+    XmakeTargetKind, resolve_position_scope,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -15,14 +15,17 @@ pub struct PositionContext {
     pub file_id: FileId,
     pub position: TextSize,
     pub is_script_scope: bool,
+    pub user_scope: Option<XmakeScope>,
 }
 
 impl PositionContext {
     pub fn new(db: &DbIndex, file_id: FileId, position: TextSize) -> Self {
+        let (is_script_scope, user_scope) = resolve_position_scope(db, file_id, position);
         Self {
             file_id,
             position,
-            is_script_scope: is_script_scope_position(db, file_id, position),
+            is_script_scope,
+            user_scope,
         }
     }
 }
@@ -187,13 +190,8 @@ fn apply_xmake_scope_filter(
         return Some(());
     }
 
-    let containing_target = db
-        .get_xmake_index()
-        .get_targets(ctx.file_id)
-        .and_then(|targets| targets.iter().find(|t| t.range.contains(ctx.position)));
-
-    match containing_target {
-        Some(xmake_target) => match (xmake_scope, xmake_target.kind) {
+    match effective_target_kind(db, ctx) {
+        Some(target_kind) => match (xmake_scope, target_kind) {
             (XmakeScope::Root, _) => Some(()),
             (XmakeScope::Package, x) if !x.is_package() => Some(()),
             (XmakeScope::Option, x) if !x.is_option() => Some(()),
@@ -208,6 +206,28 @@ fn apply_xmake_scope_filter(
             XmakeScope::Target | XmakeScope::Root => None,
             _ => Some(()),
         },
+    }
+}
+
+fn effective_target_kind(db: &DbIndex, ctx: &PositionContext) -> Option<XmakeTargetKind> {
+    if let Some(user_scope) = ctx.user_scope {
+        return user_scope_to_target_kind(user_scope);
+    }
+    db.get_xmake_index()
+        .get_targets(ctx.file_id)
+        .and_then(|targets| targets.iter().find(|t| t.range.contains(ctx.position)))
+        .map(|t| t.kind)
+}
+
+fn user_scope_to_target_kind(scope: XmakeScope) -> Option<XmakeTargetKind> {
+    match scope {
+        XmakeScope::Target => Some(XmakeTargetKind::Target),
+        XmakeScope::Package => Some(XmakeTargetKind::Package),
+        XmakeScope::Option => Some(XmakeTargetKind::Option),
+        XmakeScope::Rule => Some(XmakeTargetKind::Rule),
+        XmakeScope::Task => Some(XmakeTargetKind::Task),
+        XmakeScope::Toolchain => Some(XmakeTargetKind::Toolchain),
+        XmakeScope::Root | XmakeScope::Description | XmakeScope::Script => None,
     }
 }
 
