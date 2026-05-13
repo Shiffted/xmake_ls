@@ -452,8 +452,10 @@ fn infer_union(
     args_count: Option<usize>,
 ) -> InferCallFuncResult {
     // 此时一般是 signature + doc_function 的联合体
-    let mut all_overloads = Vec::new();
-    let mut base_signatures = Vec::new();
+    let mut in_scope_overloads = Vec::new();
+    let mut in_scope_base = Vec::new();
+    let mut out_scope_overloads = Vec::new();
+    let mut out_scope_base = Vec::new();
     let position = call_expr.get_position();
     let file_id = cache.get_file_id();
     let ctx = PositionContext::new(db, file_id, position);
@@ -461,9 +463,12 @@ fn infer_union(
         match ty {
             LuaType::Signature(signature_id) => {
                 let semantic_id = LuaSemanticDeclId::Signature(signature_id);
-                if filter_global_by_scope(db, semantic_id, &ctx).is_some() {
-                    continue;
-                }
+                let in_scope = filter_global_by_scope(db, semantic_id, &ctx).is_none();
+                let (overloads_bucket, base_bucket) = if in_scope {
+                    (&mut in_scope_overloads, &mut in_scope_base)
+                } else {
+                    (&mut out_scope_overloads, &mut out_scope_base)
+                };
 
                 if let Some(signature) = db.get_signature_index().get(&signature_id) {
                     // 处理 overloads
@@ -483,7 +488,7 @@ fn infer_union(
                     } else {
                         signature.overloads.clone()
                     };
-                    all_overloads.extend(overloads);
+                    overloads_bucket.extend(overloads);
 
                     // 处理 signature 本身的函数类型
                     let mut fake_doc_function = LuaFunctionType::new(
@@ -500,7 +505,7 @@ fn infer_union(
                             call_expr.clone(),
                         )?;
                     }
-                    base_signatures.push(Arc::new(fake_doc_function));
+                    base_bucket.push(Arc::new(fake_doc_function));
                 }
             }
             LuaType::DocFunction(func) => {
@@ -514,12 +519,19 @@ fn infer_union(
                 } else {
                     func.clone()
                 };
-                base_signatures.push(func_to_push);
+                in_scope_base.push(func_to_push);
             }
             _ => {}
         }
     }
 
+    let (mut all_overloads, base_signatures) = if !in_scope_base.is_empty()
+        || !in_scope_overloads.is_empty()
+    {
+        (in_scope_overloads, in_scope_base)
+    } else {
+        (out_scope_overloads, out_scope_base)
+    };
     all_overloads.extend(base_signatures);
     if all_overloads.is_empty() {
         return Err(InferFailReason::None);

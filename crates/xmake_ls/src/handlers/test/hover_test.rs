@@ -415,7 +415,7 @@ mod tests {
     }
 
     #[gtest]
-    fn test_hover_scope_filter_out_of_scope() -> Result<()> {
+    fn test_hover_shows_out_of_scope_function() -> Result<()> {
         let mut ws = ProviderVirtualWorkspace::new_with_init_std_lib();
         check!(ws.check_hover(
             r#"
@@ -423,7 +423,7 @@ mod tests {
                     set_de<??>fault(false)
             "#,
             VirtualHoverResult {
-                value: "unknown".to_string(),
+                value: "```lua\nfunction set_default(value: (string|boolean|number))\n```\n\n---\n\n[Open in browser](https://xmake.io/api/description/configuration-option#set_default)\n\n@*param* `value` — Default value".to_string(),
             },
         ));
         Ok(())

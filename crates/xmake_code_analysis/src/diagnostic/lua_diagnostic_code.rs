@@ -103,6 +103,8 @@ pub enum DiagnosticCode {
     EnumValueMismatch,
     /// preferred-local-alias
     PreferredLocalAlias,
+    /// xmake-scope-mismatch
+    XmakeScopeMismatch,
 
     #[serde(other)]
     None,
@@ -131,6 +133,7 @@ pub fn get_default_severity(code: DiagnosticCode) -> DiagnosticSeverity {
         DiagnosticCode::DuplicateRequire => DiagnosticSeverity::HINT,
         DiagnosticCode::IterVariableReassign => DiagnosticSeverity::ERROR,
         DiagnosticCode::PreferredLocalAlias => DiagnosticSeverity::HINT,
+        DiagnosticCode::XmakeScopeMismatch => DiagnosticSeverity::WARNING,
         _ => DiagnosticSeverity::WARNING,
     }
 }

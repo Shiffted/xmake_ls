@@ -30,3 +30,4 @@ mod unnecessary_assert_test;
 mod unnecessary_if_test;
 mod unused_test;
 mod variadic_then_fixed_test;
+mod xmake_scope_test;

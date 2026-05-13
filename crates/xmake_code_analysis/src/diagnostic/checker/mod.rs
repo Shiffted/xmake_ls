@@ -33,6 +33,7 @@ mod unknown_doc_tag;
 mod unnecessary_assert;
 mod unnecessary_if;
 mod unused;
+mod xmake_scope;
 
 use emmylua_parser::{
     LuaAstNode, LuaClosureExpr, LuaComment, LuaReturnStat, LuaStat, LuaSyntaxKind,
@@ -109,6 +110,7 @@ pub fn check_file(context: &mut DiagnosticContext, semantic_model: &SemanticMode
     run_check::<require_module_visibility::RequireModuleVisibilityChecker>(context, semantic_model);
     run_check::<unknown_doc_tag::UnknownDocTag>(context, semantic_model);
     run_check::<enum_value_mismatch::EnumValueMismatchChecker>(context, semantic_model);
+    run_check::<xmake_scope::XmakeScopeChecker>(context, semantic_model);
 
     run_check::<code_style::non_literal_expressions_in_assert::NonLiteralExpressionsInAssertChecker>(
         context,

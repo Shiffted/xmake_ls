@@ -22,9 +22,7 @@ use lsp_types::{
 use rowan::TokenAtOffset;
 pub use std_hover::{hover_std_description, is_std};
 use tokio_util::sync::CancellationToken;
-use xmake_code_analysis::{
-    FileId, LuaType, PositionContext, XmakeAnalysis, filter_type_by_scope,
-};
+use xmake_code_analysis::{FileId, XmakeAnalysis};
 
 pub async fn on_hover(
     context: ServerContextSnapshot,
@@ -83,14 +81,8 @@ pub fn hover(analysis: &XmakeAnalysis, file_id: FileId, position: Position) -> O
             });
         }
         _ => {
-            let mut semantic_info = semantic_model.get_semantic_info(token.clone().into())?;
+            let semantic_info = semantic_model.get_semantic_info(token.clone().into())?;
             let db = semantic_model.get_db();
-
-            let ctx = PositionContext::new(db, file_id, position_offset);
-            if filter_type_by_scope(db, &semantic_info.typ, &ctx).is_some() {
-                semantic_info.typ = LuaType::Unknown;
-                semantic_info.semantic_decl = None;
-            }
 
             let document = semantic_model.get_document();
             let range = token.text_range();

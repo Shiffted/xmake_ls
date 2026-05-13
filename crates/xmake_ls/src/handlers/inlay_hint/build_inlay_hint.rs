@@ -12,7 +12,7 @@ use rowan::NodeOrToken;
 use xmake_code_analysis::{
     AsyncState, FileId, InferGuard, LuaFunctionType, LuaMember, LuaMemberId, LuaMemberKey,
     LuaMemberOwner, LuaOperatorId, LuaOperatorMetaMethod, LuaSemanticDeclId, LuaType, LuaTypeDecl,
-    PositionContext, SemanticModel, filter_type_by_scope,
+    SemanticModel,
 };
 
 use rowan::TokenAtOffset;
@@ -30,9 +30,6 @@ pub fn build_inlay_hints(semantic_model: &SemanticModel) -> Option<Vec<InlayHint
                 build_closure_hint(semantic_model, &mut result, closure);
             }
             LuaAst::LuaCallExpr(call_expr) => {
-                if is_call_filtered_by_scope(semantic_model, &call_expr) {
-                    continue;
-                }
                 build_call_expr_param_hint(semantic_model, &mut result, call_expr.clone());
                 build_call_expr_await_hint(semantic_model, &mut result, call_expr.clone());
                 build_call_expr_meta_call_hint(semantic_model, &mut result, call_expr.clone());
@@ -52,22 +49,6 @@ pub fn build_inlay_hints(semantic_model: &SemanticModel) -> Option<Vec<InlayHint
     }
 
     Some(result)
-}
-
-fn is_call_filtered_by_scope(semantic_model: &SemanticModel, call_expr: &LuaCallExpr) -> bool {
-    let Some(prefix_expr) = call_expr.get_prefix_expr() else {
-        return false;
-    };
-    let Ok(prefix_type) = semantic_model.infer_expr(prefix_expr) else {
-        return false;
-    };
-    let db = semantic_model.get_db();
-    let ctx = PositionContext::new(
-        db,
-        semantic_model.get_file_id(),
-        call_expr.get_position(),
-    );
-    filter_type_by_scope(db, &prefix_type, &ctx).is_some()
 }
 
 fn build_call_expr_param_hint(

@@ -84,36 +84,39 @@ impl LuaGlobalIndex {
         }
 
         let ctx = PositionContext::new(db, file_id, position);
-        let mut last_valid_decl_id = None;
+        let mut in_scope_def_or_sig = None;
+        let mut out_of_scope_def_or_sig = None;
+        let mut in_scope_table = None;
+        let mut out_of_scope_table = None;
         for decl_id in decl_ids {
-            if filter_global_decl_by_scope(db, *decl_id, &ctx).is_some() {
+            let in_scope = filter_global_decl_by_scope(db, *decl_id, &ctx).is_none();
+            let Some(type_cache) = db.get_type_index().get_type_cache(&decl_id.clone().into())
+            else {
                 continue;
-            }
-            let decl_type_cache = db.get_type_index().get_type_cache(&decl_id.clone().into());
-            match decl_type_cache {
-                Some(type_cache) => {
-                    let typ = type_cache.as_type();
-                    if typ.is_def() || typ.is_ref() {
-                        return Some(*decl_id);
+            };
+            let typ = type_cache.as_type();
+            if typ.is_def() || typ.is_ref() || matches!(typ, LuaType::Signature(_)) {
+                if in_scope {
+                    if in_scope_def_or_sig.is_none() {
+                        in_scope_def_or_sig = Some(*decl_id);
                     }
-
-                    if let LuaType::Signature(_) = typ {
-                        return Some(*decl_id);
-                    }
-
-                    if type_cache.is_table() {
-                        last_valid_decl_id = Some(decl_id)
-                    }
+                } else if out_of_scope_def_or_sig.is_none() {
+                    out_of_scope_def_or_sig = Some(*decl_id);
                 }
-                None => {}
+            } else if type_cache.is_table() {
+                if in_scope {
+                    in_scope_table = Some(*decl_id);
+                } else {
+                    out_of_scope_table = Some(*decl_id);
+                }
             }
         }
 
-        if last_valid_decl_id.is_none() && decl_ids.len() > 0 {
-            return Some(decl_ids[0]);
-        }
-
-        last_valid_decl_id.cloned()
+        in_scope_def_or_sig
+            .or(out_of_scope_def_or_sig)
+            .or(in_scope_table)
+            .or(out_of_scope_table)
+            .or_else(|| decl_ids.first().copied())
     }
 }
 
@@ -173,6 +176,30 @@ pub fn filter_global_by_scope(
     let property = db.get_property_index().get_property(&semantic_id)?;
     let xmake_scope = property.scope?;
     apply_xmake_scope_filter(db, xmake_scope, ctx)
+}
+
+/// Returns the list of scopes a global name is declared with when every declaration
+/// of that name is out of the current context's scope. Returns `None` when at least
+/// one declaration is in scope (or untagged), meaning the call is valid.
+pub fn out_of_scope_global_scopes(
+    db: &DbIndex,
+    name: &str,
+    ctx: &PositionContext,
+) -> Option<Vec<XmakeScope>> {
+    let decl_ids = db.get_global_index().get_global_decl_ids(name)?;
+    let mut scopes: Vec<XmakeScope> = Vec::new();
+    for decl_id in decl_ids {
+        let Some(scope) = lookup_global_decl_scope(db, *decl_id) else {
+            return None;
+        };
+        if apply_xmake_scope_filter(db, scope, ctx).is_none() {
+            return None;
+        }
+        if !scopes.contains(&scope) {
+            scopes.push(scope);
+        }
+    }
+    if scopes.is_empty() { None } else { Some(scopes) }
 }
 
 fn apply_xmake_scope_filter(
