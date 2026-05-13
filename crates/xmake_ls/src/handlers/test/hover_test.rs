@@ -428,4 +428,25 @@ mod tests {
         ));
         Ok(())
     }
+
+    #[gtest]
+    fn test_hover_user_shadowed_global() -> Result<()> {
+        let mut ws = ProviderVirtualWorkspace::new_with_init_std_lib();
+        check!(ws.check_hover(
+            r#"
+                --- My local override
+                ---@param val string
+                function add_urls(val)
+                end
+
+                target("test", function()
+                    add_u<??>rls("url")
+                end)
+            "#,
+            VirtualHoverResult {
+                value: "```lua\nfunction add_urls(val: string)\n```\n\n---\n\nMy local override".to_string(),
+            },
+        ));
+        Ok(())
+    }
 }

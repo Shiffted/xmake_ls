@@ -34,7 +34,7 @@ fn check_call_expr(
 
     match prefix {
         LuaExpr::NameExpr(name_expr) => {
-            check_name_call(context, db, &ctx, &name_expr);
+            check_name_call(context, db, file_id, &ctx, &name_expr);
         }
         LuaExpr::IndexExpr(index_expr) => {
             let prefix_type = semantic_model
@@ -59,12 +59,23 @@ fn check_call_expr(
 fn check_name_call(
     context: &mut DiagnosticContext,
     db: &crate::DbIndex,
+    file_id: crate::FileId,
     ctx: &PositionContext,
     name_expr: &LuaNameExpr,
 ) -> Option<()> {
     let name = name_expr.get_name_text()?;
-    let scopes = out_of_scope_global_scopes(db, &name, ctx)?;
     let range = name_expr.get_range();
+    // If the name resolves to a user-defined decl in the current file, the user has
+    // shadowed the meta function — don't flag it as out-of-scope.
+    if let Some(decl_id) = db
+        .get_reference_index()
+        .get_var_reference_decl(&file_id, range)
+    {
+        if !db.get_module_index().is_meta_file(&decl_id.file_id) {
+            return Some(());
+        }
+    }
+    let scopes = out_of_scope_global_scopes(db, &name, ctx)?;
     emit_diagnostic(context, range, &name, &scopes);
     Some(())
 }

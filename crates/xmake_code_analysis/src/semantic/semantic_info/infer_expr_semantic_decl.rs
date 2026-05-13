@@ -124,8 +124,9 @@ fn get_name_decl_id(
     let decl_id = local_ref.get_decl_id(&range);
 
     if let Some(decl_id) = decl_id {
-        let decl = db.get_decl_index().get_decl(&decl_id)?;
-        if decl.is_local() {
+        if db.get_decl_index().get_decl(&decl_id).is_some() {
+            // Prefer the in-file decl whether local or a user-defined global —
+            // it shadows any meta global with the same name.
             return Some(decl_id);
         }
     }
